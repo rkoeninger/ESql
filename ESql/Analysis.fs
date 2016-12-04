@@ -13,7 +13,7 @@ type Id =
     | Unnamed
     | Star
 
-type Projected = (string * SqlType) list
+type Projected = (string option * SqlType) list
 
 type SqlExpr =
     | IdExpr of Id
@@ -23,10 +23,9 @@ type SqlExpr =
 
 type SelectStmt = { Projection: SqlExpr list; Source: Columns }
 
-let tuple2 x y = (x, y)
-let mapFst f (x, y) = (f x, y)
-
 // TODO: qualified names
+
+let mapFst f (x, y) = (f x, y)
 
 let single xs =
     match xs with
@@ -36,10 +35,10 @@ let single xs =
 let analyze (stmt: SelectStmt) : Projected =
     let rec analyzeExpr expr =
         match expr with
-        | IdExpr(Named id) -> [List.find (fst >> (=) id) stmt.Source]
-        | IdExpr(Star) -> stmt.Source
+        | IdExpr(Named id) -> [List.find (fst >> (=) id) stmt.Source |> mapFst Some]
+        | IdExpr(Star) -> List.map (mapFst Some) stmt.Source
         | IdExpr(Unnamed) -> failwith "Shouldn't have Unnamed here"
-        | AliasExpr(body, id) -> [id, analyzeExpr body |> single |> snd]
+        | AliasExpr(body, id) -> [Some id, analyzeExpr body |> single |> snd]
         | CastExpr(body, typ) -> [analyzeExpr body |> single |> fst, typ]
-        | CountExpr _ -> ["", Int]
+        | CountExpr _ -> [None, Int]
     List.map analyzeExpr stmt.Projection |> List.concat
