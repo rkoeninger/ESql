@@ -9,58 +9,91 @@ type Tests() =
 
     let assertEq x y = x = y |> Assert.IsTrue
 
+    let expectErr f =
+        try
+            f() |> ignore
+            failwith "Error expected"
+        with
+            _ -> ()
+    
+    // create table People ( Name varchar(64), Phone varchar(16), Email varchar(32) )
+    let people = "People", ["Name", Varchar; "Phone", Varchar; "Email", Varchar]
+
+    // create table Addresses ( Name varchar(64), City(64) )
+    let addresses = "Addresses", ["Name", Varchar; "City", Varchar]
+
     [<Test>]
     member this.``select``() =
-        // create table People ( Name varchar(64), Phone varchar(16), Email varchar(32) )
-        let cols = ["Name", Varchar; "Phone", Varchar; "Email", Varchar]
         // select Name, Email from People
-        let proj = analyze { Projection = [IdExpr(Named "Name"); IdExpr(Named "Email")]; Source = cols }
-        assertEq [Some "Name", Varchar; Some "Email", Varchar] proj
+        let proj = [IdExpr(Named "Name"); IdExpr(Named "Email")]
+        let stmt = analyze { Projection = proj; Sources = [people] }
+        assertEq [Some "Name", Varchar; Some "Email", Varchar] stmt
         
     [<Test>]
     member this.``select as``() =
-        // create table People ( Name varchar(64), Phone varchar(16), Email varchar(32) )
-        let cols = ["Name", Varchar; "Phone", Varchar; "Email", Varchar]
         // select Name as N, Email as E from People
-        let proj = analyze { Projection = [AliasExpr(IdExpr(Named "Name"), "N"); AliasExpr(IdExpr(Named "Email"), "E")]; Source = cols }
-        assertEq [Some "N", Varchar; Some "E", Varchar] proj
+        let proj = [AliasExpr(IdExpr(Named "Name"), "N"); AliasExpr(IdExpr(Named "Email"), "E")]
+        let stmt = analyze { Projection = proj; Sources = [people] }
+        assertEq [Some "N", Varchar; Some "E", Varchar] stmt
         
     [<Test>]
     member this.``select cast``() =
-        // create table People ( Name varchar(64), Phone varchar(16), Email varchar(32) )
-        let cols = ["Name", Varchar; "Phone", Varchar; "Email", Varchar]
         // select Name, cast(nvarchar, Email) from People
-        let proj = analyze { Projection = [IdExpr(Named "Name"); CastExpr(IdExpr(Named "Email"), NVarchar)]; Source = cols }
-        assertEq [Some "Name", Varchar; Some "Email", NVarchar] proj
+        let proj = [IdExpr(Named "Name"); CastExpr(IdExpr(Named "Email"), NVarchar)]
+        let stmt = analyze { Projection = proj; Sources = [people] }
+        assertEq [Some "Name", Varchar; Some "Email", NVarchar] stmt
         
     [<Test>]
     member this.``select cast as``() =
-        // create table People ( Name varchar(64), Phone varchar(16), Email varchar(32) )
-        let cols = ["Name", Varchar; "Phone", Varchar; "Email", Varchar]
         // select Name, cast(nvarchar, Email) as E from People
-        let proj = analyze { Projection = [IdExpr(Named "Name"); AliasExpr(CastExpr(IdExpr(Named "Email"), NVarchar), "E")]; Source = cols }
-        assertEq [Some "Name", Varchar; Some "E", NVarchar] proj
+        let proj = [IdExpr(Named "Name"); AliasExpr(CastExpr(IdExpr(Named "Email"), NVarchar), "E")]
+        let stmt = analyze { Projection = proj; Sources = [people] }
+        assertEq [Some "Name", Varchar; Some "E", NVarchar] stmt
 
     [<Test>]
     member this.``select count``() =
-        // create table People ( Name varchar(64), Age int )
-        let cols = ["Name", Varchar; "Age", Int]
         // select count(*) from People where Age >= 21
-        let proj = analyze { Projection = [CountExpr(IdExpr Star)]; Source = cols }
-        assertEq [None, Int] proj
+        let proj = [CountExpr(IdExpr Star)]
+        let stmt = analyze { Projection = proj; Sources = [people] }
+        assertEq [None, Int] stmt
 
     [<Test>]
     member this.``select count as``() =
-        // create table People ( Name varchar(64), Age int )
-        let cols = ["Name", Varchar; "Age", Int]
         // select count(*) as Drinkers from People where Age >= 21
-        let proj = analyze { Projection = [AliasExpr(CountExpr(IdExpr Star), "Drinkers")]; Source = cols }
-        assertEq [Some "Drinkers", Int] proj
+        let proj = [AliasExpr(CountExpr(IdExpr Star), "Drinkers")]
+        let stmt = analyze { Projection = proj; Sources = [people] }
+        assertEq [Some "Drinkers", Int] stmt
 
     [<Test>]
     member this.``select *``() =
-        // create table People ( Name varchar(64), Phone varchar(16), Email varchar(32) )
-        let cols = ["Name", Varchar; "Phone", Varchar; "Email", Varchar]
         // select * from People
-        let proj = analyze { Projection = [IdExpr Star]; Source = cols }
-        assertEq [Some "Name", Varchar; Some "Phone", Varchar; Some "Email", Varchar] proj
+        let proj = [IdExpr Star]
+        let stmt = analyze { Projection = proj; Sources = [people] }
+        assertEq [Some "Name", Varchar; Some "Phone", Varchar; Some "Email", Varchar] stmt
+
+    [<Test>]
+    member this.``select Table.* from join``() =
+        // select People.* from People
+        let proj = [IdExpr(Qualified("People", Star))]
+        let stmt = analyze { Projection = proj; Sources = [people; addresses] }
+        assertEq [Some "Name", Varchar; Some "Phone", Varchar; Some "Email", Varchar] stmt
+
+    [<Test>]
+    member this.``select Table.col from join``() =
+        // select People.Name, Addresses.City from People join Addresses on People.Name = Addresses.Name
+        let proj = [IdExpr(Qualified("People", Named "Name")); IdExpr(Qualified("Addresses", Named "City"))]
+        let stmt = analyze { Projection = proj; Sources = [people; addresses] }
+        assertEq [Some "Name", Varchar; Some "City", Varchar] stmt
+
+    [<Test>]
+    member this.``select from join``() =
+        // select Phone, City from People join Addresses on People.Name = Addresses.Name
+        let proj = [IdExpr(Named "Phone"); IdExpr(Named "City")]
+        let stmt = analyze { Projection = proj; Sources = [people; addresses] }
+        assertEq [Some "Phone", Varchar; Some "City", Varchar] stmt
+
+    [<Test>]
+    member this.``select ambiguous name from join``() =
+        // select Name, City from People join Addresses on People.Name = Addresses.Name
+        let proj = [IdExpr(Named "Name"); IdExpr(Named "City")]
+        expectErr(fun () -> analyze { Projection = proj; Sources = [people; addresses] })
