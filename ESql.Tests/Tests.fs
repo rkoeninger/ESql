@@ -30,6 +30,13 @@ type Tests() =
         assertEq [Some "Name", Varchar; Some "Email", Varchar] stmt
         
     [<Test>]
+    member this.``select literal varchar``() =
+        // select 'literal'
+        let proj = [ConstExpr Varchar]
+        let stmt = analyze { Projection = proj; Sources = [] }
+        assertEq [None, Varchar] stmt
+
+    [<Test>]
     member this.``select as``() =
         // select Name as N, Email as E from People
         let proj = [AliasExpr(IdExpr(Named "Name"), "N"); AliasExpr(IdExpr(Named "Email"), "E")]
@@ -72,7 +79,7 @@ type Tests() =
         assertEq [Some "Name", Varchar; Some "Phone", Varchar; Some "Email", Varchar] stmt
 
     [<Test>]
-    member this.``select Table.* from join``() =
+    member this.``select Table.*``() =
         // select People.* from People
         let proj = [IdExpr(Qualified("People", Star))]
         let stmt = analyze { Projection = proj; Sources = [people; addresses] }

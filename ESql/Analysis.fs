@@ -17,6 +17,7 @@ type Id =
 type Projected = (string option * SqlType) list
 
 type SqlExpr =
+    | ConstExpr of SqlType
     | IdExpr of Id
     | AliasExpr of SqlExpr * string
     | CastExpr of SqlExpr * SqlType
@@ -48,6 +49,7 @@ let analyze (stmt: SelectStmt) : Projected =
         | Unnamed -> failwith "Shouldn't have Unnamed here"
     let rec analyzeExpr expr =
         match expr with
+        | ConstExpr typ -> [None, typ]
         | IdExpr id -> analyzeId id stmt.Sources
         | AliasExpr(body, id) -> [Some id, analyzeExpr body |> single |> snd]
         | CastExpr(body, typ) -> [analyzeExpr body |> single |> fst, typ]
