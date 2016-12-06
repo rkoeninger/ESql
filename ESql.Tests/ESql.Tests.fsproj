@@ -51,7 +51,8 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="Tests.fs" />
+    <Compile Include="QueryProjectionTests.fs" />
+    <Compile Include="QueryParametersTests.fs" />
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
