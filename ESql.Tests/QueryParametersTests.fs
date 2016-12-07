@@ -8,6 +8,16 @@ open Analysis
 type QueryParametersTests() =
 
     let assertEq x y = x = y |> Assert.IsTrue
+    
+    // create table People ( Name varchar(64), Phone varchar(16), Email varchar(32) )
+    let people = "People", ["Name", Varchar; "Phone", Varchar; "Email", Varchar]
+
+    [<Test>]
+    member this.``where column = literal``() =
+        // where Name = 'Guy'
+        let clause = BinaryExpr(Eq, IdExpr(Named "Name"), ConstExpr Varchar)
+        let query = inferParameters { Condition = clause; Sources = [people] }
+        assertEq Map.empty query
 
     [<Test>]
     member this.``where param = literal``() =
@@ -29,3 +39,10 @@ type QueryParametersTests() =
         let clause = BinaryExpr(And, BinaryExpr(Eq, IdExpr(Param "X"), ConstExpr Int), BinaryExpr(Eq, IdExpr(Param "Y"), ConstExpr Varchar))
         let query = inferParameters { Condition = clause; Sources = [] }
         assertEq (Map.ofList ["X", Int; "Y", Varchar]) query
+
+    [<Test>]
+    member this.``where column = param``() =
+        // where Name = @YourName
+        let clause = BinaryExpr(Eq, IdExpr(Named "Name"), IdExpr(Param "YourName"))
+        let query = inferParameters { Condition = clause; Sources = [people] }
+        assertEq (Map.ofList ["YourName", Varchar]) query

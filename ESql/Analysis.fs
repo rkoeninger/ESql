@@ -75,17 +75,20 @@ type Parameters = Map<string, SqlType>
 
 let merge = Map.fold (fun acc key value -> Map.add key value acc)
 
-let inferType expr =
+let rec inferType expr (sources: Sources) =
     match expr with
     | ConstExpr typ -> typ
     | CastExpr(_, typ) -> typ
+    | CountExpr _ -> Int
+    | AliasExpr(body, _) -> inferType body sources
+    | IdExpr(Named name) -> sources |> List.map snd |> List.concat |> List.filter (fst >> (=) name) |> single |> snd
     | _ -> failwith "Can't infer type"
 
 let inferParameters (clause: WhereClause) : Parameters =
     let rec analyzeExpr expr =
         match expr with
-        | BinaryExpr(_, IdExpr(Param name), expr) -> Map.ofList [name, inferType expr]
-        | BinaryExpr(_, expr, IdExpr(Param name)) -> Map.ofList [name, inferType expr]
+        | BinaryExpr(_, IdExpr(Param name), expr) -> Map.ofList [name, inferType expr clause.Sources]
+        | BinaryExpr(_, expr, IdExpr(Param name)) -> Map.ofList [name, inferType expr clause.Sources]
         | BinaryExpr(_, expr0, expr1) -> merge (analyzeExpr expr0) (analyzeExpr expr1)
-        | _ -> failwith "Can't analyze expression"
+        | _ -> Map.empty
     analyzeExpr clause.Condition
