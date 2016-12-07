@@ -71,7 +71,9 @@ let inferProjection (stmt: SelectStmt) : Projection =
 
 type WhereClause = { Condition: SqlExpr; Sources: Sources }
 
-type Parameters = (string * SqlType) list
+type Parameters = Map<string, SqlType>
+
+let merge = Map.fold (fun acc key value -> Map.add key value acc)
 
 let inferType expr =
     match expr with
@@ -82,7 +84,8 @@ let inferType expr =
 let inferParameters (clause: WhereClause) : Parameters =
     let rec analyzeExpr expr =
         match expr with
-        | BinaryExpr(_, IdExpr(Param name), expr) -> [name, inferType expr]
-        | BinaryExpr(_, expr, IdExpr(Param name)) -> [name, inferType expr]
+        | BinaryExpr(_, IdExpr(Param name), expr) -> Map.ofList [name, inferType expr]
+        | BinaryExpr(_, expr, IdExpr(Param name)) -> Map.ofList [name, inferType expr]
+        | BinaryExpr(_, expr0, expr1) -> merge (analyzeExpr expr0) (analyzeExpr expr1)
         | _ -> failwith "Can't analyze expression"
     analyzeExpr clause.Condition
