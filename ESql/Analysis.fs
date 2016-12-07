@@ -19,6 +19,7 @@ type Columns = (string * SqlType) list
 type Id =
     | Qualified of string * Id
     | Named of string
+    | Param of string
     | Unnamed
     | Star
 
@@ -50,12 +51,14 @@ let inferProjection (stmt: SelectStmt) : Projection =
         | Named name -> [cols |> List.find (fst >> (=) name) |> mapFst Some]
         | Star -> List.map (mapFst Some) cols
         | Unnamed -> failwith "Shouldn't have Unnamed here"
+        | Param _ -> failwith "Shouldn't have Param here"
     let analyzeId (id: Id) (sources: Sources) =
         match id with
         | Qualified(qualifier, id) -> sources |> List.find (fst >> (=) qualifier) |> snd |> analyzeIdForTable id
         | Named name -> [sources |> List.map snd |> List.concat |> List.filter (fst >> (=) name) |> single |> mapFst Some]
         | Star -> sources |> List.map snd |> List.concat |> List.map (mapFst Some)
         | Unnamed -> failwith "Shouldn't have Unnamed here"
+        | Param _ -> failwith "Shouldn't have Param here"
     let rec analyzeExpr expr =
         match expr with
         | ConstExpr typ -> [None, typ]
@@ -70,36 +73,16 @@ type WhereClause = { Condition: SqlExpr; Sources: Sources }
 
 type Parameters = (string * SqlType) list
 
-let inferQualifiedIdType name (cols: Columns) : SqlType =
-    cols |> List.find (fst >> (=) name) |> snd
-
-let inferIdType id (sources: Sources) : SqlType =
-    match id with
-    | Unnamed -> failwith "Shouldn't have Unnamed here"
-    | Star -> failwith "Shouldn't have Star here"
-    | Qualified(qualifier, Named id) -> sources |> List.find (fst >> (=) qualifier) |> snd |> inferQualifiedIdType id
-    | Qualified _ -> failwith "Qualified should have single name here"
-    | Named name -> sources |> List.map snd |> List.concat |> List.filter (fst >> (=) name) |> single |> snd
-
-let rec inferType expr (sources: Sources) : Parameters * SqlType =
+let inferType expr =
     match expr with
-    | IdExpr id -> [], inferIdType id sources
-    | ConstExpr typ -> [], typ
-    | AliasExpr(body, _) -> inferType body sources
-    | CastExpr(_, typ) -> [], typ
-    | CountExpr _ -> [], Int
-    | BinaryExpr(_, _, _) -> [], Bit
+    | ConstExpr typ -> typ
+    | CastExpr(_, typ) -> typ
+    | _ -> failwith "Can't infer type"
 
 let inferParameters (clause: WhereClause) : Parameters =
     let rec analyzeExpr expr =
         match expr with
-        | IdExpr id -> [], inferIdType id clause.Sources
-        | ConstExpr typ -> [], typ
-        | AliasExpr(body, _) -> inferType body clause.Sources
-        | CastExpr(_, typ) -> [], typ
-        | CountExpr _ -> [], Int
-        | BinaryExpr(_, left, right) ->
-            let l = analyzeExpr left
-            let r = analyzeExpr right
-            [], Bit
-    analyzeExpr clause.Condition |> fst
+        | BinaryExpr(_, IdExpr(Param name), expr) -> [name, inferType expr]
+        | BinaryExpr(_, expr, IdExpr(Param name)) -> [name, inferType expr]
+        | _ -> failwith "Can't analyze expression"
+    analyzeExpr clause.Condition
