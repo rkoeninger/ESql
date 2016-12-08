@@ -1,4 +1,4 @@
-﻿namespace ESql.Tests
+﻿namespace SqlPen.Tests
 
 open NUnit.Framework
 open Analysis

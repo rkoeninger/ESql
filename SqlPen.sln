@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ESql", "ESql\ESql.fsproj", "{E989A48D-A4BE-465C-ABB3-A870C1AFC4FD}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SqlPen.Lib", "SqlPen.Lib\SqlPen.Lib.fsproj", "{E989A48D-A4BE-465C-ABB3-A870C1AFC4FD}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ESql.Tests", "ESql.Tests\ESql.Tests.fsproj", "{5FFBB225-854F-4DC6-B6BD-4666F159A988}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SqlPen.Tests", "SqlPen.Tests\SqlPen.Tests.fsproj", "{5FFBB225-854F-4DC6-B6BD-4666F159A988}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

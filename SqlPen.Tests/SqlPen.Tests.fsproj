@@ -7,12 +7,12 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>5ffbb225-854f-4dc6-b6bd-4666f159a988</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>ESql.Tests</RootNamespace>
-    <AssemblyName>ESql.Tests</AssemblyName>
+    <RootNamespace>SqlPen.Tests</RootNamespace>
+    <AssemblyName>SqlPen.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Name>ESql.Tests</Name>
+    <Name>SqlPen.Tests</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -22,7 +22,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\ESql.Tests.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\SqlPen.Tests.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -31,7 +31,7 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Release\ESql.Tests.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\SqlPen.Tests.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
@@ -69,8 +69,8 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ESql\ESql.fsproj">
-      <Name>ESql</Name>
+    <ProjectReference Include="..\SqlPen.Lib\SqlPen.Lib.fsproj">
+      <Name>SqlPen</Name>
       <Project>{e989a48d-a4be-465c-abb3-a870c1afc4fd}</Project>
       <Private>True</Private>
     </ProjectReference>
