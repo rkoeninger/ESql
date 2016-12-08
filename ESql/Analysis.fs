@@ -71,7 +71,7 @@ let inferProjection (stmt: SelectStmt) : Projection =
         | ConstExpr typ -> [None, typ]
         | IdExpr id -> analyzeId id stmt.Sources
         | AliasExpr(body, id) -> [Some id, analyzeExpr body |> single |> snd]
-        | CastExpr(body, typ) -> [analyzeExpr body |> single |> fst, typ]
+        | CastExpr(body, typ) -> [None, typ]
         | CountExpr _ -> [None, Int]
         | BinaryExpr(_, left, right) -> [None, Bit]
     stmt.Selections |> List.map analyzeExpr |> List.concat

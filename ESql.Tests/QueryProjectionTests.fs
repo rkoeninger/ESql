@@ -44,7 +44,6 @@ type QueryProjectionTests() =
         assertEq [Some "N", Varchar; Some "E", Varchar] stmt
         
     [<Test>]
-    [<Ignore("cast should not pull through id name as sql server does not do this")>]
     member this.``select cast``() =
         // select Name, cast(nvarchar, Email) from People
         let sel = [IdExpr(Named "Name"); CastExpr(IdExpr(Named "Email"), NVarchar)]
