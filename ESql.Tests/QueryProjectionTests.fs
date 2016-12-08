@@ -7,7 +7,7 @@ open Analysis
 [<Category("Unit")>]
 type QueryProjectionTests() =
 
-    let assertEq x y = Assert.IsTrue((x = y))
+    let assertEq (x: 'a) (y: 'a) = Assert.AreEqual(x, y)
 
     let expectErr f =
         try
@@ -44,11 +44,12 @@ type QueryProjectionTests() =
         assertEq [Some "N", Varchar; Some "E", Varchar] stmt
         
     [<Test>]
+    [<Ignore("cast should not pull through id name as sql server does not do this")>]
     member this.``select cast``() =
         // select Name, cast(nvarchar, Email) from People
         let sel = [IdExpr(Named "Name"); CastExpr(IdExpr(Named "Email"), NVarchar)]
         let stmt = inferProjection { Selections = sel; Sources = [people] }
-        assertEq [Some "Name", Varchar; Some "Email", NVarchar] stmt
+        assertEq [Some "Name", Varchar; None, NVarchar] stmt
         
     [<Test>]
     member this.``select cast as``() =

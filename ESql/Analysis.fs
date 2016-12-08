@@ -5,8 +5,10 @@ type SqlType =
     | Int
     | Varchar
     | NVarchar
-    | Multi of Set<SqlType>
-    | Unknown
+    
+type SqlTypeBounds =
+    | Any
+    | Limits of Set<SqlType> // If set is empty, can't be anything
 
 type Op =
     | Eq
@@ -40,7 +42,7 @@ type SelectStmt = { Selections: SqlExpr list; Sources: Sources }
 
 type WhereClause = { Condition: SqlExpr; Sources: Sources }
 
-type Parameters = Map<string, SqlType>
+type Parameters = Map<string, SqlTypeBounds>
 
 let mapFst f (x, y) = (f x, y)
 
@@ -76,52 +78,40 @@ let inferProjection (stmt: SelectStmt) : Projection =
 
 type Mode = Union | Intersection
 
-let unifyScalarMulti m x ys =
-    match m with
-    | Union -> Multi(Set.add x ys)
-    | Intersection -> if Set.contains x ys then x else Unknown
+let singleType = Set.singleton >> Limits
 
-// TODO: distinguish between Unknown as in 'Top' and 'Bottom'
-
-let unifyTypes m t0 t1 =
-    let f =
-        match m with
-        | Union -> Set.union
-        | Intersection -> Set.intersect
+let unifyTypeBounds m t0 t1 =
     match t0, t1 with
-    | Unknown, Unknown -> Unknown
-    | Multi xs, Multi ys -> Multi(f xs ys)
-    | x, Unknown -> x
-    | Unknown, y -> y
-    //| Unknown, _ -> Unknown // TODO: this is what it looks like with Unknown := 'Top'
-    //| _, Unknown -> Unknown
-    | x, Multi ys -> unifyScalarMulti m x ys
-    | Multi xs, y -> unifyScalarMulti m y xs
-    | x, y when x = y -> x
-    | x, y ->
+    | Any, Any -> Any
+    | (xs, Any | Any, xs) ->
         match m with
-        | Union -> Multi(Set.ofList [x; y])
-        | Intersection -> Unknown
+        | Union -> Any
+        | Intersection -> xs
+    | Limits xs, Limits ys ->
+        match m with
+        | Union -> Limits(Set.union xs ys)
+        | Intersection -> Limits(Set.intersect xs ys)
 
 let merge m =
     let combine acc key value0 =
         match Map.tryFind key acc with
-        | Some value1 -> Map.add key (unifyTypes m value0 value1) acc
+        | Some value1 -> Map.add key (unifyTypeBounds m value0 value1) acc
         | None -> Map.add key value0 acc
     Map.fold combine
 
 let rec inferType expr (sources: Sources) =
     match expr with
-    | ConstExpr typ -> typ
-    | CastExpr(_, typ) -> typ
-    | CountExpr _ -> Int
+    | ConstExpr typ -> singleType typ
+    | CastExpr(_, typ) -> singleType typ
+    | CountExpr _ -> singleType Int
     | AliasExpr(body, _) -> inferType body sources
-    | IdExpr(Named name) -> sources |> List.map snd |> List.concat |> List.filter (fst >> (=) name) |> single |> snd
-    | _ -> failwith "Can't infer type"
+    | IdExpr(Named name) -> sources |> List.map snd |> List.concat |> List.filter (fst >> (=) name) |> single |> snd |> singleType
+    | _ -> Any
 
 let inferParameters (clause: WhereClause) : Parameters =
     let rec analyzeExpr expr =
         match expr with
+        | BinaryExpr(_, IdExpr(Param name0), IdExpr(Param name1)) -> Map.ofList [name0, Any; name1, Any]
         | BinaryExpr(_, IdExpr(Param name), expr) -> Map.ofList [name, inferType expr clause.Sources]
         | BinaryExpr(_, expr, IdExpr(Param name)) -> Map.ofList [name, inferType expr clause.Sources]
         | BinaryExpr(Or, expr0, expr1) -> merge Union (analyzeExpr expr0) (analyzeExpr expr1)
