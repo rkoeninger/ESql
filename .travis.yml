@@ -7,4 +7,4 @@ install:
   - nuget install NUnit.Runners -Version 3.2.0 -OutputDirectory testrunner
 script:
   - xbuild /p:Configuration=Release SqlPen.sln
-  - mono ./testrunner/NUnit.ConsoleRunner.3.2.0/tools/nunit3-console.exe ./Kl.Tests/bin/Release/SqlPen.Tests.dll
+  - mono ./testrunner/NUnit.ConsoleRunner.3.2.0/tools/nunit3-console.exe ./SqlPen.Tests/bin/Release/SqlPen.Tests.dll
