@@ -41,9 +41,16 @@ type QueryParametersTests() =
         assertEq (Map.ofList ["Id", Int]) query
 
     [<Test>]
-    member this.``where params = literals``() =
+    member this.``where params = literals intersection``() =
         // where @X = 1 and @Y = 'hi'
         let clause = BinaryExpr(And, BinaryExpr(Eq, IdExpr(Param "X"), ConstExpr Int), BinaryExpr(Eq, IdExpr(Param "Y"), ConstExpr Varchar))
+        let query = inferParameters { Condition = clause; Sources = [] }
+        assertEq (Map.ofList ["X", Int; "Y", Varchar]) query
+
+    [<Test>]
+    member this.``where params = literals union``() =
+        // where @X = 1 or @Y = 'hi'
+        let clause = BinaryExpr(Or, BinaryExpr(Eq, IdExpr(Param "X"), ConstExpr Int), BinaryExpr(Eq, IdExpr(Param "Y"), ConstExpr Varchar))
         let query = inferParameters { Condition = clause; Sources = [] }
         assertEq (Map.ofList ["X", Int; "Y", Varchar]) query
 
