@@ -7,7 +7,7 @@ open Analysis
 [<Category("Unit")>]
 type QueryProjectionTests() =
 
-    let assertEq x y = x = y |> Assert.IsTrue
+    let assertEq x y = Assert.IsTrue((x = y))
 
     let expectErr f =
         try

@@ -7,8 +7,8 @@ open Analysis
 [<Category("Unit")>]
 type QueryParametersTests() =
 
-    let assertEq x y = x = y |> Assert.IsTrue
-    
+    let assertEq x y = Assert.IsTrue((x = y))
+
     // create table People ( Name varchar(64), Phone varchar(16), Email varchar(32) )
     let people = "People", ["Name", Varchar; "Phone", Varchar; "Email", Varchar]
 
@@ -16,6 +16,13 @@ type QueryParametersTests() =
     member this.``where column = literal``() =
         // where Name = 'Guy'
         let clause = BinaryExpr(Eq, IdExpr(Named "Name"), ConstExpr Varchar)
+        let query = inferParameters { Condition = clause; Sources = [people] }
+        assertEq Map.empty query
+        
+    [<Test>]
+    member this.``where literal = column``() =
+        // where 'Guy' = Name
+        let clause = BinaryExpr(Eq, ConstExpr Varchar, IdExpr(Named "Name"))
         let query = inferParameters { Condition = clause; Sources = [people] }
         assertEq Map.empty query
 
@@ -46,3 +53,24 @@ type QueryParametersTests() =
         let clause = BinaryExpr(Eq, IdExpr(Named "Name"), IdExpr(Param "YourName"))
         let query = inferParameters { Condition = clause; Sources = [people] }
         assertEq (Map.ofList ["YourName", Varchar]) query
+
+    [<Test>]
+    member this.``where param = column``() =
+        // where @YourName = Name
+        let clause = BinaryExpr(Eq, IdExpr(Param "YourName"), IdExpr(Named "Name"))
+        let query = inferParameters { Condition = clause; Sources = [people] }
+        assertEq (Map.ofList ["YourName", Varchar]) query
+
+    [<Test>]
+    member this.``where param has union type``() =
+        // where X < 0 or X = 'hi'
+        let clause = BinaryExpr(Or, BinaryExpr(Lt, IdExpr(Param "X"), ConstExpr Int), BinaryExpr(Eq, IdExpr(Param "X"), ConstExpr Varchar))
+        let query = inferParameters { Condition = clause; Sources = [] }
+        assertEq (Map.ofList ["X", Multi(Set.ofList [Int; Varchar])]) query
+
+    [<Test>]
+    member this.``where param has intersection type``() =
+        // where X < 0 and X = 'hi'
+        let clause = BinaryExpr(And, BinaryExpr(Lt, IdExpr(Param "X"), ConstExpr Int), BinaryExpr(Eq, IdExpr(Param "X"), ConstExpr Varchar))
+        let query = inferParameters { Condition = clause; Sources = [] }
+        assertEq (Map.ofList ["X", Unknown]) query
