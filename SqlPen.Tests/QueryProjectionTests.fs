@@ -42,14 +42,14 @@ type QueryProjectionTests() =
         let sel = [AliasExpr(IdExpr(Named "Name"), "N"); AliasExpr(IdExpr(Named "Email"), "E")]
         let stmt = inferProjection { Selections = sel; Sources = [people] }
         assertEq [Some "N", Varchar; Some "E", Varchar] stmt
-        
+
     [<Test>]
     member this.``select cast``() =
         // select Name, cast(nvarchar, Email) from People
         let sel = [IdExpr(Named "Name"); CastExpr(IdExpr(Named "Email"), NVarchar)]
         let stmt = inferProjection { Selections = sel; Sources = [people] }
         assertEq [Some "Name", Varchar; None, NVarchar] stmt
-        
+
     [<Test>]
     member this.``select cast as``() =
         // select Name, cast(nvarchar, Email) as E from People
