@@ -1,48 +1,4 @@
-﻿module Analysis
-
-type SqlType =
-    | Bit
-    | Int
-    | Varchar
-    | NVarchar
-    
-type SqlTypeBounds =
-    | Any
-    | Limits of Set<SqlType> // If set is empty, can't be anything
-
-type Op =
-    | Eq
-    | Gt
-    | Lt
-    | And
-    | Or
-
-type Columns = (string * SqlType) list
-
-type Id =
-    | Qualified of string * Id
-    | Named of string
-    | Param of string
-    | Unnamed
-    | Star
-
-type Projection = (string option * SqlType) list
-
-type SqlExpr =
-    | ConstExpr of SqlType
-    | IdExpr of Id
-    | AliasExpr of SqlExpr * string
-    | CastExpr of SqlExpr * SqlType
-    | CountExpr of SqlExpr
-    | BinaryExpr of Op * SqlExpr * SqlExpr
-
-type Sources = (string * Columns) list
-
-type SelectStmt = { Selections: SqlExpr list; Sources: Sources }
-
-type WhereClause = { Condition: SqlExpr; Sources: Sources }
-
-type Parameters = Map<string, SqlTypeBounds>
+﻿module SqlPen.Analysis
 
 let mapFst f (x, y) = (f x, y)
 
@@ -75,8 +31,6 @@ let inferProjection (stmt: SelectStmt) : Projection =
         | CountExpr _ -> [None, Int]
         | BinaryExpr(_, left, right) -> [None, Bit]
     stmt.Selections |> List.map analyzeExpr |> List.concat
-
-type Mode = Union | Intersection
 
 let singleType = Set.singleton >> Limits
 

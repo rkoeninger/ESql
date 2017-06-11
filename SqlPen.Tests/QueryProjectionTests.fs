@@ -1,7 +1,8 @@
 ﻿namespace SqlPen.Tests
 
 open NUnit.Framework
-open Analysis
+open SqlPen
+open SqlPen.Analysis
 
 [<TestFixture>]
 [<Category("Unit")>]
