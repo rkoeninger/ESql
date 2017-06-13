@@ -52,9 +52,9 @@
   <ItemGroup>
     <Content Include="packages.config" />
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="ProvidedTypes.fsi" />
-    <Compile Include="ProvidedTypes.fs" />
-    <Compile Include="DebugProvidedTypes.fs" />
+    <Compile Include="ProvidedTypes\ProvidedTypes.fsi" />
+    <Compile Include="ProvidedTypes\ProvidedTypes.fs" />
+    <Compile Include="ProvidedTypes\DebugProvidedTypes.fs" />
     <Compile Include="Types.fs" />
     <Compile Include="Parsing.fs" />
     <Compile Include="Analysis.fs" />
