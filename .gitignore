@@ -3,3 +3,4 @@ obj/
 .vs/
 packages/
 *.user
+SqlPen.Lib/*ProvidedTypes.fs*

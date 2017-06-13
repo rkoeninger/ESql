@@ -5,7 +5,7 @@ type SqlType =
     | Int
     | Varchar
     | NVarchar
-    
+
 type SqlTypeBounds =
     | Any
     | Limits of Set<SqlType> // If set is empty, can't be anything

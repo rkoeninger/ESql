@@ -50,12 +50,15 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
+    <Content Include="packages.config" />
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="ProvidedTypes.fsi" />
+    <Compile Include="ProvidedTypes.fs" />
+    <Compile Include="DebugProvidedTypes.fs" />
     <Compile Include="Types.fs" />
     <Compile Include="Parsing.fs" />
     <Compile Include="Analysis.fs" />
     <Compile Include="Generation.fs" />
-    <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FParsec">
