@@ -56,7 +56,7 @@
     <Compile Include="ProvidedTypes\ProvidedTypes.fs" />
     <Compile Include="ProvidedTypes\DebugProvidedTypes.fs" />
     <Compile Include="Types.fs" />
-    <Compile Include="Parsing.fs" />
+    <Compile Include="Parser.fs" />
     <Compile Include="Analysis.fs" />
     <Compile Include="Generation.fs" />
   </ItemGroup>

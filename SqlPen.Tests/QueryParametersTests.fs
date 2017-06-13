@@ -16,77 +16,77 @@ type QueryParametersTests() =
     [<Test>]
     member this.``where column = literal``() =
         // where Name = 'Guy'
-        let clause = BinaryExpr(Eq, IdExpr(Named "Name"), ConstExpr Varchar)
+        let clause = BinaryExpr(IdExpr(Named "Name"), Eq, ConstExpr Varchar)
         let query = inferParameters { Condition = clause; Sources = [people] }
         assertEq Map.empty query
         
     [<Test>]
     member this.``where literal = column``() =
         // where 'Guy' = Name
-        let clause = BinaryExpr(Eq, ConstExpr Varchar, IdExpr(Named "Name"))
+        let clause = BinaryExpr(ConstExpr Varchar, Eq, IdExpr(Named "Name"))
         let query = inferParameters { Condition = clause; Sources = [people] }
         assertEq Map.empty query
 
     [<Test>]
     member this.``where param = literal``() =
         // where @Id = 1
-        let clause = BinaryExpr(Eq, IdExpr(Param "Id"), ConstExpr Int)
+        let clause = BinaryExpr(IdExpr(Param "Id"), Eq, ConstExpr Int)
         let query = inferParameters { Condition = clause; Sources = [] }
         assertEq (Map.ofList ["Id", singleType Int]) query
 
     [<Test>]
     member this.``where literal = param``() =
         // where 1 = @Id
-        let clause = BinaryExpr(Eq, ConstExpr Int, IdExpr(Param "Id"))
+        let clause = BinaryExpr(ConstExpr Int, Eq, IdExpr(Param "Id"))
         let query = inferParameters { Condition = clause; Sources = [] }
         assertEq (Map.ofList ["Id", singleType Int]) query
 
     [<Test>]
     member this.``where params = literals intersection``() =
         // where @X = 1 and @Y = 'hi'
-        let clause = BinaryExpr(And, BinaryExpr(Eq, IdExpr(Param "X"), ConstExpr Int), BinaryExpr(Eq, IdExpr(Param "Y"), ConstExpr Varchar))
+        let clause = BinaryExpr(BinaryExpr(IdExpr(Param "X"), Eq, ConstExpr Int), And, BinaryExpr(IdExpr(Param "Y"), Eq, ConstExpr Varchar))
         let query = inferParameters { Condition = clause; Sources = [] }
         assertEq (Map.ofList ["X", singleType Int; "Y", singleType Varchar]) query
 
     [<Test>]
     member this.``where params = literals union``() =
         // where @X = 1 or @Y = 'hi'
-        let clause = BinaryExpr(Or, BinaryExpr(Eq, IdExpr(Param "X"), ConstExpr Int), BinaryExpr(Eq, IdExpr(Param "Y"), ConstExpr Varchar))
+        let clause = BinaryExpr(BinaryExpr(IdExpr(Param "X"), Eq, ConstExpr Int), Or, BinaryExpr(IdExpr(Param "Y"), Eq, ConstExpr Varchar))
         let query = inferParameters { Condition = clause; Sources = [] }
         assertEq (Map.ofList ["X", singleType Int; "Y", singleType Varchar]) query
 
     [<Test>]
     member this.``where column = param``() =
         // where Name = @YourName
-        let clause = BinaryExpr(Eq, IdExpr(Named "Name"), IdExpr(Param "YourName"))
+        let clause = BinaryExpr(IdExpr(Named "Name"), Eq, IdExpr(Param "YourName"))
         let query = inferParameters { Condition = clause; Sources = [people] }
         assertEq (Map.ofList ["YourName", singleType Varchar]) query
 
     [<Test>]
     member this.``where param = column``() =
         // where @YourName = Name
-        let clause = BinaryExpr(Eq, IdExpr(Param "YourName"), IdExpr(Named "Name"))
+        let clause = BinaryExpr(IdExpr(Param "YourName"), Eq, IdExpr(Named "Name"))
         let query = inferParameters { Condition = clause; Sources = [people] }
         assertEq (Map.ofList ["YourName", singleType Varchar]) query
 
     [<Test>]
     member this.``where param has union type``() =
         // where @X < 0 or @X = 'hi'
-        let clause = BinaryExpr(Or, BinaryExpr(Lt, IdExpr(Param "X"), ConstExpr Int), BinaryExpr(Eq, IdExpr(Param "X"), ConstExpr Varchar))
+        let clause = BinaryExpr(BinaryExpr(IdExpr(Param "X"), Lt, ConstExpr Int), Or, BinaryExpr(IdExpr(Param "X"), Eq, ConstExpr Varchar))
         let query = inferParameters { Condition = clause; Sources = [] }
         assertEq (Map.ofList ["X", Limits(Set.ofList [Int; Varchar])]) query
 
     [<Test>]
     member this.``where param has intersection type``() =
         // where @X < 0 and @X = 'hi'
-        let clause = BinaryExpr(And, BinaryExpr(Lt, IdExpr(Param "X"), ConstExpr Int), BinaryExpr(Eq, IdExpr(Param "X"), ConstExpr Varchar))
+        let clause = BinaryExpr(BinaryExpr(IdExpr(Param "X"), Lt, ConstExpr Int), And, BinaryExpr(IdExpr(Param "X"), Eq, ConstExpr Varchar))
         let query = inferParameters { Condition = clause; Sources = [] }
         assertEq (Map.ofList ["X", Limits Set.empty]) query
 
     [<Test>]
     member this.``where params are compared``() =
         // where @X = @Y
-        let clause = BinaryExpr(Eq, IdExpr(Param "X"), IdExpr(Param "Y"))
+        let clause = BinaryExpr(IdExpr(Param "X"), Eq, IdExpr(Param "Y"))
         let query = inferParameters { Condition = clause; Sources = [] }
         assertEq (Map.ofList ["X", Any; "Y", Any]) query
 
@@ -94,6 +94,6 @@ type QueryParametersTests() =
     [<Ignore("This would require backtracking")>]
     member this.``where params are compared and one is constrained``() =
         // where (@X = @Y) and (@X = 0)
-        let clause = BinaryExpr(And, BinaryExpr(Eq, IdExpr(Param "X"), IdExpr(Param "Y")), BinaryExpr(Eq, IdExpr(Param "X"), ConstExpr Int))
+        let clause = BinaryExpr(BinaryExpr(IdExpr(Param "X"), Eq, IdExpr(Param "Y")), And, BinaryExpr(IdExpr(Param "X"), Eq, ConstExpr Int))
         let query = inferParameters { Condition = clause; Sources = [] }
         assertEq (Map.ofList ["X", singleType Int; "Y", singleType Int]) query

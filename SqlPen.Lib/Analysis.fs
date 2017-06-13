@@ -29,7 +29,7 @@ let inferProjection (stmt: SelectStmt) : Projection =
         | AliasExpr(body, id) -> [Some id, analyzeExpr body |> single |> snd]
         | CastExpr(body, typ) -> [None, typ]
         | CountExpr _ -> [None, Int]
-        | BinaryExpr(_, left, right) -> [None, Bit]
+        | BinaryExpr(left, _, right) -> [None, Bit]
     stmt.Selections |> List.map analyzeExpr |> List.concat
 
 let singleType = Set.singleton >> Limits
@@ -65,10 +65,10 @@ let rec inferType expr (sources: Sources) =
 let inferParameters (clause: WhereClause) : Parameters =
     let rec analyzeExpr expr =
         match expr with
-        | BinaryExpr(_, IdExpr(Param name0), IdExpr(Param name1)) -> Map.ofList [name0, Any; name1, Any]
-        | BinaryExpr(_, IdExpr(Param name), expr) -> Map.ofList [name, inferType expr clause.Sources]
-        | BinaryExpr(_, expr, IdExpr(Param name)) -> Map.ofList [name, inferType expr clause.Sources]
-        | BinaryExpr(Or, expr0, expr1) -> merge Union (analyzeExpr expr0) (analyzeExpr expr1)
-        | BinaryExpr(_, expr0, expr1) -> merge Intersection (analyzeExpr expr0) (analyzeExpr expr1)
+        | BinaryExpr(IdExpr(Param name0), _, IdExpr(Param name1)) -> Map.ofList [name0, Any; name1, Any]
+        | BinaryExpr(IdExpr(Param name), _, expr) -> Map.ofList [name, inferType expr clause.Sources]
+        | BinaryExpr(expr, _, IdExpr(Param name)) -> Map.ofList [name, inferType expr clause.Sources]
+        | BinaryExpr(expr0, Or, expr1) -> merge Union (analyzeExpr expr0) (analyzeExpr expr1)
+        | BinaryExpr(expr0, _, expr1) -> merge Intersection (analyzeExpr expr0) (analyzeExpr expr1)
         | _ -> Map.empty
     analyzeExpr clause.Condition

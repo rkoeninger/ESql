@@ -34,7 +34,7 @@ type SqlExpr =
     | AliasExpr of SqlExpr * string
     | CastExpr of SqlExpr * SqlType
     | CountExpr of SqlExpr
-    | BinaryExpr of Op * SqlExpr * SqlExpr
+    | BinaryExpr of SqlExpr * Op * SqlExpr
 
 type Sources = (string * Columns) list
 
