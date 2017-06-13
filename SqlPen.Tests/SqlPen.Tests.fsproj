@@ -50,11 +50,13 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
-    <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="QueryProjectionTests.fs" />
-    <Compile Include="QueryParametersTests.fs" />
-    <Compile Include="Parsing.fs" />
+    <Content Include="app.config" />
     <Content Include="packages.config" />
+    <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="Assertions.fs" />
+    <Compile Include="QueryProjection.fs" />
+    <Compile Include="QueryParameters.fs" />
+    <Compile Include="Parsing.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

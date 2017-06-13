@@ -50,6 +50,7 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
+    <Content Include="app.config" />
     <Content Include="packages.config" />
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="ProvidedTypes\ProvidedTypes.fsi" />

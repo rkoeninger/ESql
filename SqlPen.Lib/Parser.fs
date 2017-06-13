@@ -1,5 +1,4 @@
-﻿[<AutoOpen>]
-module SqlPen.Parser
+﻿module SqlPen.Parser
 
 open FParsec
 
@@ -7,19 +6,19 @@ let private pExpr, pExprRef = createParserForwardedToRef<SqlExpr, unit>()
 
 let private pOperator =
     choice [
-        pstring "=" >>. preturn Eq
-        pstring ">" >>. preturn Gt
-        pstring "<" >>. preturn Lt
-        pstring "and" >>. preturn And
-        pstring "or" >>. preturn Or
+        stringReturn "="   Eq
+        stringReturn ">"   Gt
+        stringReturn "<"   Lt
+        stringReturn "and" And
+        stringReturn "or"  Or
     ]
 
 let private pType =
     choice [
-        pstring "bit" >>. preturn Bit
-        pstring "int" >>. preturn Int
-        pstring "varchar" >>. preturn Varchar
-        pstring "nvarchar" >>. preturn NVarchar
+        stringReturn "bit"      Bit
+        stringReturn "int"      Int
+        stringReturn "varchar"  Varchar
+        stringReturn "nvarchar" NVarchar
     ]
 
 let private binary p0 pfill0 p1 f = tuple2 (p0 .>> pfill0) p1 |>> f
@@ -29,7 +28,7 @@ let private ternary p0 pfill0 p1 pfill1 p2 f = tuple3 (p0 .>> pfill0) (p1 .>> pf
 let private pConst =
     choice [
         pfloat >>. preturn (ConstExpr Int)
-        between (pstring "\'") (pstring "\'") (regex "\\w*") >>. preturn (ConstExpr Varchar)
+        between (pchar '\'') (pchar '\'') (manySatisfy ((<>) '\'')) >>. preturn (ConstExpr Varchar)
     ]
 
 let private pBinOp =
@@ -48,7 +47,9 @@ let private pCast =
         pType
         CastExpr
 
-do pExprRef := choice [pBinOp; pCast; pConst]
+let private pParens = between (pchar '(') (pchar ')')
+
+do pExprRef := choice [pParens pExpr; pBinOp; pCast; pConst]
 
 let private pWhere =
     pstring "where" >>. spaces1 >>.
@@ -65,10 +66,11 @@ let private pFrom =
     many (pJoin .>> spaces1)
 
 let private pSelect =
-    pstring "select" >>. spaces1 >>.
-    many (pExpr .>> spaces1) .>>
-    pFrom .>> spaces1 .>>
-    pWhere
+    stringReturn "select" {Selections=[]; Sources=[]}
+    //pstring "select" >>. spaces1 >>. sepBy pExpr (spaces .>> pchar ',' .>> spaces)
+    ////many1 (pExpr .>> spaces .>> pchar ',' .>> spaces)// .>>
+    ////opt pFrom .>> spaces1 .>>
+    ////opt pWhere
 
 let parse s =
     match run pSelect s with
