@@ -31,7 +31,7 @@ let rec private ident (x: string) =
 let private pIdentifier =
     choice [
         stringReturn "*" Star
-        manySatisfy (fun ch -> ch = ' ' || ch = '\n' || ch = '\r') |>> ident
+        manySatisfy (fun ch -> ch <> ' ' && ch <> '\n' && ch <> '\r') |>> ident
     ]
 
 let private binary p0 pfill0 p1 f = tuple2 (p0 .>> pfill0) p1 |>> f
