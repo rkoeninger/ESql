@@ -7,5 +7,5 @@ open SqlPen.Parser
 
 [<Test>]
 let ``simple parsing test``() =
-    parse "select" |> ignore
+    assertEq (Named "Name") (parse "select Name") // TODO: pExpr goes into infinite loop
     ()

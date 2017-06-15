@@ -1,5 +1,6 @@
 ﻿module SqlPen.Parser
 
+open System
 open FParsec
 
 let private pExpr, pExprRef = createParserForwardedToRef<SqlExpr, unit>()
@@ -28,10 +29,12 @@ let rec private ident (x: string) =
         Qualified(x.Substring(0, i), ident (x.Substring(i + 1, x.Length - i - 1)))
     else Named x
 
+let private isIdentifierChar ch = Char.IsLetter ch || Char.IsDigit ch || ch = '_' || ch = '.' || ch = '@'
+
 let private pIdentifier =
     choice [
         stringReturn "*" Star
-        manySatisfy (fun ch -> ch <> ' ' && ch <> '\n' && ch <> '\r') |>> ident
+        manySatisfy isIdentifierChar |>> ident
     ]
 
 let private binary p0 pfill0 p1 f = tuple2 (p0 .>> pfill0) p1 |>> f
@@ -85,7 +88,8 @@ let private pFrom =
     many (pJoin .>> spaces1)
 
 let private pSelect =
-    stringReturn "select" {Selections=[]; Sources=[]}
+    pstring "select" >>. spaces1 >>. pIdentifier // pExpr
+    //stringReturn "select" {Selections=[]; Sources=[]}
     //pstring "select" >>. spaces1 >>. sepBy pExpr (spaces .>> pchar ',' .>> spaces)
     ////many1 (pExpr .>> spaces .>> pchar ',' .>> spaces)// .>>
     ////opt pFrom .>> spaces1 .>>

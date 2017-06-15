@@ -25,6 +25,13 @@ type Id =
     | Param of string
     | Unnamed
     | Star
+    override this.ToString() =
+        match this with
+        | Star -> "*"
+        | Unnamed -> "_"
+        | Param x -> sprintf "@%s" x
+        | Named x -> x
+        | Qualified(x, y) -> sprintf "%s.%O" x y
 
 type Projection = (string option * SqlType) list
 
