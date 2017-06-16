@@ -7,5 +7,10 @@ open SqlPen.Parser
 
 [<Test>]
 let ``simple parsing test``() =
-    assertEq (Named "Name") (parse "select Name") // TODO: pExpr goes into infinite loop
+    let expected = {
+        Expressions = [IdExpr (Named "Name"); ConstExpr Int]
+        Tables = ["Whatever"]
+        Filter = ConstExpr Int
+    }
+    assertEq expected (parse "select Name,0 from Whatever")
     ()

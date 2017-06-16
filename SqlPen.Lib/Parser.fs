@@ -47,7 +47,7 @@ let private pConst =
         between (pchar '\'') (pchar '\'') (manySatisfy ((<>) '\'')) >>. preturn (ConstExpr Varchar)
     ]
 
-let private pBinOp =
+let private pBinOp = // TODO: including in pExpr causes infinite loop?
     ternary
         pExpr
         spaces1
@@ -56,7 +56,7 @@ let private pBinOp =
         pExpr
         BinaryExpr
 
-let private pCast =
+let private pCast = // TODO: including in pExpr causes infinite loop?
     binary
         pExpr
         (spaces1 .>> pstring "as" .>> spaces1)
@@ -67,8 +67,8 @@ let private pParens = between (pchar '(') (pchar ')')
 
 do pExprRef := choice [
     pParens pExpr
-    pBinOp
-    pCast
+    //pBinOp
+    //pCast
     pConst
     pIdentifier |>> IdExpr
 ]
@@ -85,17 +85,31 @@ let private pJoin =
 
 let private pFrom =
     (pstring "from" >>. spaces1 >>. pIdentifier) .>>.
-    many (pJoin .>> spaces1)
+    many (spaces1 >>. pJoin)
+
+// TODO: need to be able to have optional spaces around comma
+let private pcomma = //spaces >>. pchar ',' >>. spaces
+    pchar ','
 
 let private pSelect =
-    pstring "select" >>. spaces1 >>. pIdentifier // pExpr
-    //stringReturn "select" {Selections=[]; Sources=[]}
-    //pstring "select" >>. spaces1 >>. sepBy pExpr (spaces .>> pchar ',' .>> spaces)
-    ////many1 (pExpr .>> spaces .>> pchar ',' .>> spaces)// .>>
-    ////opt pFrom .>> spaces1 .>>
-    ////opt pWhere
+    pstring "select" >>. spaces1 >>. sepBy pExpr pcomma
+
+let private sel (exprs, ids) =
+    let (first, rest) = ids
+    {
+        Expressions = exprs;
+        Tables = List.map (fun x -> x.ToString()) (first :: rest);
+        Filter = ConstExpr Int
+    }
+
+let private pSelectStatement =
+    binary
+        pSelect
+        spaces1
+        pFrom
+        sel
 
 let parse s =
-    match run pSelect s with
+    match run pSelectStatement s with
     | Success(result, _, _) -> result
     | Failure(error, _, _) -> failwith error
