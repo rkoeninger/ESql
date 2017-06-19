@@ -2,12 +2,14 @@
 
 open Microsoft.FSharp.Core.CompilerServices
 open Microsoft.FSharp.Collections
+open ProviderImplementation.ProvidedTypes
 
-[<TypeProvider>]
-type QueryProvider(file: string) as this =
-    //inherit TypeProviderForNamespaces()
-
-    //do this.AddNamespace(namespaceName, types)
-
+module Meta =
     [<assembly:TypeProviderAssembly>]
     do ()
+
+[<TypeProvider>]
+type QueryProvider(cfg: TypeProviderConfig) as this =
+    inherit TypeProviderForNamespaces()
+
+    //do this.AddNamespace(namespaceName, types)

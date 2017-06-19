@@ -85,16 +85,21 @@ let private pJoin =
 
 let private pFrom =
     (pstring "from" >>. spaces1 >>. pIdentifier) .>>.
-    many (spaces1 >>. pJoin)
+    many (attempt (spaces1 >>. pJoin))
 
-// TODO: need to be able to have optional spaces around comma
-let private pcomma = //spaces >>. pchar ',' >>. spaces
-    pchar ','
+let private pcomma = spaces >>. pchar ',' >>. spaces
 
-let private pSelect =
-    pstring "select" >>. spaces1 >>. sepBy pExpr pcomma
+let private pSelect = pstring "select" >>. spaces1 >>. sepBy1 pExpr (attempt pcomma)
 
-let private sel (exprs, ids) =
+let private sel (exprs, ids, wh) =
+    let (first, rest) = ids
+    {
+        Expressions = exprs;
+        Tables = List.map (fun x -> x.ToString()) (first :: rest);
+        Filter = wh
+    }
+
+let private sel2 (exprs, ids) =
     let (first, rest) = ids
     {
         Expressions = exprs;
@@ -103,11 +108,21 @@ let private sel (exprs, ids) =
     }
 
 let private pSelectStatement =
-    binary
-        pSelect
-        spaces1
-        pFrom
-        sel
+    choice [
+        attempt
+            (ternary
+                pSelect
+                spaces1
+                pFrom
+                spaces1
+                pWhere
+                sel)
+        binary
+            pSelect
+            spaces1
+            pFrom
+            sel2
+    ]
 
 let parse s =
     match run pSelectStatement s with
