@@ -37,6 +37,10 @@ let private pIdentifier =
         manySatisfy isIdentifierChar |>> ident
     ]
 
+let private isShortIdentifierChar ch = Char.IsLetter ch || Char.IsDigit ch || ch = '_'
+
+let private pShortIdentifier = manySatisfy isShortIdentifierChar
+
 let private binary p0 pfill0 p1 f = tuple2 (p0 .>> pfill0) p1 |>> f
 
 let private ternary p0 pfill0 p1 pfill1 p2 f = tuple3 (p0 .>> pfill0) (p1 .>> pfill1) p2 |>> f
@@ -63,7 +67,7 @@ let private pCast = // TODO: including in pExpr causes infinite loop?
         pType
         CastExpr
 
-let private pParens = between (pchar '(') (pchar ')')
+let private pParens p = between (pchar '(') (pchar ')') p
 
 do pExprRef := choice [
     pParens pExpr
@@ -87,9 +91,9 @@ let private pFrom =
     (pstring "from" >>. spaces1 >>. pIdentifier) .>>.
     many (attempt (spaces1 >>. pJoin))
 
-let private pcomma = spaces >>. pchar ',' >>. spaces
+let private pComma = spaces >>. pchar ',' >>. spaces
 
-let private pSelect = pstring "select" >>. spaces1 >>. sepBy1 pExpr (attempt pcomma)
+let private pSelect = pstring "select" >>. spaces1 >>. sepBy1 pExpr (attempt pComma)
 
 let private sel (exprs, ids, wh) =
     let (first, rest) = ids
@@ -123,6 +127,18 @@ let private pSelectStatement =
             pFrom
             sel2
     ]
+
+let private pColumnDecl =
+    binary
+        pShortIdentifier
+        spaces1
+        pType
+        id
+
+let private pCreateTableStatement =
+    pstring "create" >>. spaces1 >>.
+    pstring "table" >>. spaces >>.
+    pParens (sepBy1 pColumnDecl (attempt pComma))
 
 let parse s =
     match run pSelectStatement s with

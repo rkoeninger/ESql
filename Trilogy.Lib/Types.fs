@@ -64,3 +64,20 @@ type Insert = {
     Columns: string list
     Values: SqlExpr list
 }
+
+type Update = {
+    Table: string
+    Assignments: (string * SqlExpr) list
+    Filter: SqlExpr
+}
+
+type Delete = {
+    Table: string
+    Filter: SqlExpr
+}
+
+type Statement =
+    | SelectStatement of Select
+    | InsertStatement of Insert
+    | UpdateStatement of Update
+    | DeleteStatement of Delete
