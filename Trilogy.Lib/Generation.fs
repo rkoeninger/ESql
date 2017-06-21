@@ -1,4 +1,4 @@
-﻿namespace Generation
+﻿namespace Trilogy
 
 open System.IO
 open System.Reflection
