@@ -1,4 +1,4 @@
-﻿module SqlPen.Parser
+﻿module Trilogy.Parser
 
 open System
 open FParsec

@@ -1,4 +1,4 @@
-﻿namespace SqlPen.Tests.AssemblyInfo
+﻿namespace Trilogy.Tests.AssemblyInfo
 
 open System.Reflection
 open System.Runtime.CompilerServices
@@ -7,11 +7,11 @@ open System.Runtime.InteropServices
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[<assembly: AssemblyTitle("SqlPen.Tests")>]
+[<assembly: AssemblyTitle("Trilogy.Tests")>]
 [<assembly: AssemblyDescription("")>]
 [<assembly: AssemblyConfiguration("")>]
 [<assembly: AssemblyCompany("")>]
-[<assembly: AssemblyProduct("SqlPen.Tests")>]
+[<assembly: AssemblyProduct("Trilogy.Tests")>]
 [<assembly: AssemblyCopyright("Copyright © 2016")>]
 [<assembly: AssemblyTrademark("")>]
 [<assembly: AssemblyCulture("")>]

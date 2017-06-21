@@ -1,9 +1,9 @@
-﻿module SqlPen.Tests.QueryProjection
+﻿module Trilogy.Tests.QueryProjection
 
 open NUnit.Framework
-open SqlPen.Tests.Assertions
-open SqlPen
-open SqlPen.Analysis
+open Trilogy.Tests.Assertions
+open Trilogy
+open Trilogy.Analysis
 
 let expectErr f =
     try

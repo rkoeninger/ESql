@@ -1,4 +1,4 @@
-﻿module SqlPen.Tests.Assertions
+﻿module Trilogy.Tests.Assertions
 
 open NUnit.Framework
 

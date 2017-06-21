@@ -1,9 +1,9 @@
-﻿module SqlPen.Tests.QueryParameters
+﻿module Trilogy.Tests.QueryParameters
 
 open NUnit.Framework
-open SqlPen.Tests.Assertions
-open SqlPen
-open SqlPen.Analysis
+open Trilogy.Tests.Assertions
+open Trilogy
+open Trilogy.Analysis
 
 // create table People ( Name varchar(64), Phone varchar(16), Email varchar(32) )
 let people = "People", ["Name", Varchar; "Phone", Varchar; "Email", Varchar]

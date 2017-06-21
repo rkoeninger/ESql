@@ -1,4 +1,4 @@
-﻿namespace SqlPen
+﻿namespace Trilogy
 
 type SqlType =
     | Bit

@@ -14,7 +14,7 @@ open ProviderImplementation.ProvidedTypes
 type QueryProvider(config: TypeProviderConfig) as this =
     inherit TypeProviderForNamespaces()
 
-    let ns = "SqlPen"
+    let ns = "Trilogy"
     let asm = Assembly.GetExecutingAssembly()
     let tempAsmPath = Path.ChangeExtension(Path.GetTempFileName(), ".dll")
     let tempAsm = ProvidedAssembly tempAsmPath

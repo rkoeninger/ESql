@@ -1,9 +1,9 @@
-﻿module SqlPen.Tests.Parsing
+﻿module Trilogy.Tests.Parsing
 
 open NUnit.Framework
-open SqlPen.Tests.Assertions
-open SqlPen
-open SqlPen.Parser
+open Trilogy.Tests.Assertions
+open Trilogy
+open Trilogy.Parser
 
 [<Test>]
 let ``simple parsing test``() =

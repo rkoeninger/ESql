@@ -1,4 +1,4 @@
-﻿module SqlPen.Analysis
+﻿module Trilogy.Analysis
 
 let mapFst f (x, y) = (f x, y)
 
