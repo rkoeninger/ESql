@@ -55,8 +55,15 @@ let ``create statment``() =
 let ``multiple statements``() =
     let expected =
         [
-            CreateStatement { Name = "Tbl"; Columns = ["X", Int; "Y", Varchar] }
-            SelectStatement { Expressions = [IdExpr (Named "Y")]; Tables = ["Tbl"]; Filter = ConstExpr Int }
+            CreateStatement {
+                Name = "Tbl"
+                Columns = ["X", Int; "Y", Varchar]
+            }
+            SelectStatement {
+                Expressions = [IdExpr (Named "Y")]
+                Tables = ["Tbl"]
+                Filter = ConstExpr Int
+            }
         ]
     assertEq expected (parseAll "create table Tbl (X int, Y varchar)
                                  select Y from Tbl where 5")

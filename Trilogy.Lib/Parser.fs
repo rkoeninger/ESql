@@ -63,7 +63,7 @@ let private pBinOp = // TODO: including in pExpr causes infinite loop?
 let private pCast = // TODO: including in pExpr causes infinite loop?
     binary
         pExpr
-        (spaces1 .>> pstring "as" .>> spaces1)
+        (attempt (spaces1 .>> pstring "as" .>> spaces1))
         pType
         CastExpr
 

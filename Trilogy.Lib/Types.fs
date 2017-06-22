@@ -45,9 +45,15 @@ type SqlExpr =
 
 type Sources = (string * Columns) list
 
-type SelectStmt = { Selections: SqlExpr list; Sources: Sources }
+type SelectStmt = {
+    Selections: SqlExpr list
+    Sources: Sources
+}
 
-type WhereClause = { Condition: SqlExpr; Sources: Sources }
+type WhereClause = {
+    Condition: SqlExpr
+    Sources: Sources
+}
 
 type Parameters = Map<string, SqlTypeBounds>
 
@@ -87,3 +93,8 @@ type Statement =
     | UpdateStatement of Update
     | DeleteStatement of Delete
     | CreateStatement of CreateTable
+
+type Batch = {
+    Name: string
+    Statements: Statement list
+}
