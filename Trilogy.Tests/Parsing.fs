@@ -44,7 +44,7 @@ let ``delete statement``() =
     assertEq expected (parse "insert into Tbl (X, Y) values (0, 'a')")
 
 [<Test>]
-let ``create table statment``() =
+let ``create statment``() =
     let expected = CreateStatement {
         Name = "Thingy"
         Columns = ["X", Int; "Y", Varchar]
@@ -52,4 +52,11 @@ let ``create table statment``() =
     assertEq expected (parse "create table Thingy ( X int, Y varchar )")
 
 [<Test>]
-let ``multiple statements``() = ()
+let ``multiple statements``() =
+    let expected =
+        [
+            CreateStatement { Name = "Tbl"; Columns = ["X", Int; "Y", Varchar] }
+            SelectStatement { Expressions = [IdExpr (Named "Y")]; Tables = ["Tbl"]; Filter = ConstExpr Int }
+        ]
+    assertEq expected (parseAll "create table Tbl (X int, Y varchar)
+                                 select Y from Tbl where 5")

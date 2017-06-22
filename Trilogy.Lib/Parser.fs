@@ -221,7 +221,7 @@ let private pColumnDecl =
         pType
         id
 
-let private pCreateTableStatement =
+let private pCreateStatement =
     pstring "create" >>.
     spaces1 >>.
     pstring "table" >>.
@@ -242,10 +242,16 @@ let private pStatement =
         pInsertStatement
         pUpdateStatement
         pDeleteStatement
-        pCreateTableStatement
+        pCreateStatement
     ]
 
-let parse s =
-    match run pStatement s with
+let private pStatements = sepBy pStatement spaces1
+
+let private runParser p s =
+    match run p s with
     | Success(result, _, _) -> result
     | Failure(error, _, _) -> failwith error
+
+let parse = runParser pStatement
+
+let parseAll = runParser pStatements
