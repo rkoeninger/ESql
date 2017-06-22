@@ -24,7 +24,7 @@ let private pType =
 
 let private pComma = spaces >>. pchar ',' >>. spaces
 
-let private pAs = spaces1 >>. pstring "as" >>. spaces1
+//let private pAs = spaces1 >>. pstring "as" >>. spaces1
 
 let rec private ident (x: string) =
     if x.StartsWith "@" then Param(x.Substring 1)
@@ -66,12 +66,12 @@ let private pBinOp = // TODO: including in pExpr causes infinite loop?
         pExpr
         BinaryExpr
 
-let private pAliasExpr = // TODO: including in pExpr causes infinite loop?
-    binary
-        pExpr
-        (attempt pAs)
-        pShortIdentifier
-        AliasExpr
+//let private pAliasExpr = // TODO: including in pExpr causes infinite loop?
+//    binary
+//        pExpr
+//        (attempt pAs)
+//        pShortIdentifier
+//        AliasExpr
 
 let private pCountExpr =
     pstring "count"
@@ -89,7 +89,6 @@ do pExprRef := choice [
     pCountExpr
     pCastExpr
     //pBinOp
-    //pAliasExpr
     pConstExpr
     pIdentifier |>> IdExpr
 ]

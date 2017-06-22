@@ -38,7 +38,7 @@ type Projection = (string option * SqlType) list
 type SqlExpr =
     | ConstExpr of SqlType
     | IdExpr of Id
-    | AliasExpr of SqlExpr * string
+    //| AliasExpr of SqlExpr * string
     | CastExpr of SqlExpr * SqlType
     | CountExpr of SqlExpr
     | BinaryExpr of SqlExpr * Op * SqlExpr

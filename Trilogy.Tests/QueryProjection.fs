@@ -32,12 +32,12 @@ let ``select literal varchar``() =
     let stmt = inferProjection { Selections = sel; Sources = [] }
     assertEq [None, Varchar] stmt
 
-[<Test>]
-let ``select as``() =
-    // select Name as N, Email as E from People
-    let sel = [AliasExpr(IdExpr(Named "Name"), "N"); AliasExpr(IdExpr(Named "Email"), "E")]
-    let stmt = inferProjection { Selections = sel; Sources = [people] }
-    assertEq [Some "N", Varchar; Some "E", Varchar] stmt
+//[<Test>]
+//let ``select as``() =
+//    // select Name as N, Email as E from People
+//    let sel = [AliasExpr(IdExpr(Named "Name"), "N"); AliasExpr(IdExpr(Named "Email"), "E")]
+//    let stmt = inferProjection { Selections = sel; Sources = [people] }
+//    assertEq [Some "N", Varchar; Some "E", Varchar] stmt
 
 [<Test>]
 let ``select cast``() =
@@ -46,12 +46,12 @@ let ``select cast``() =
     let stmt = inferProjection { Selections = sel; Sources = [people] }
     assertEq [Some "Name", Varchar; None, NVarchar] stmt
 
-[<Test>]
-let ``select cast as``() =
-    // select Name, cast(nvarchar, Email) as E from People
-    let sel = [IdExpr(Named "Name"); AliasExpr(CastExpr(IdExpr(Named "Email"), NVarchar), "E")]
-    let stmt = inferProjection { Selections = sel; Sources = [people] }
-    assertEq [Some "Name", Varchar; Some "E", NVarchar] stmt
+//[<Test>]
+//let ``select cast as``() =
+//    // select Name, cast(nvarchar, Email) as E from People
+//    let sel = [IdExpr(Named "Name"); AliasExpr(CastExpr(IdExpr(Named "Email"), NVarchar), "E")]
+//    let stmt = inferProjection { Selections = sel; Sources = [people] }
+//    assertEq [Some "Name", Varchar; Some "E", NVarchar] stmt
 
 [<Test>]
 let ``select count``() =
@@ -60,12 +60,12 @@ let ``select count``() =
     let stmt = inferProjection { Selections = sel; Sources = [people] }
     assertEq [None, Int] stmt
 
-[<Test>]
-let ``select count as``() =
-    // select count(*) as Drinkers from People where Age >= 21
-    let sel = [AliasExpr(CountExpr(IdExpr Star), "Drinkers")]
-    let stmt = inferProjection { Selections = sel; Sources = [people] }
-    assertEq [Some "Drinkers", Int] stmt
+//[<Test>]
+//let ``select count as``() =
+//    // select count(*) as Drinkers from People where Age >= 21
+//    let sel = [AliasExpr(CountExpr(IdExpr Star), "Drinkers")]
+//    let stmt = inferProjection { Selections = sel; Sources = [people] }
+//    assertEq [Some "Drinkers", Int] stmt
 
 [<Test>]
 let ``select *``() =
