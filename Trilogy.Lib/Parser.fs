@@ -95,22 +95,6 @@ let private pComma = spaces >>. pchar ',' >>. spaces
 
 let private pSelect = pstring "select" >>. spaces1 >>. sepBy1 pExpr (attempt pComma)
 
-let private sel (exprs, ids, wh) =
-    let (first, rest) = ids
-    {
-        Expressions = exprs;
-        Tables = List.map (fun x -> x.ToString()) (first :: rest);
-        Filter = wh
-    }
-
-let private sel2 (exprs, ids) =
-    let (first, rest) = ids
-    {
-        Expressions = exprs;
-        Tables = List.map (fun x -> x.ToString()) (first :: rest);
-        Filter = ConstExpr Int
-    }
-
 let private pSelectStatement =
     choice [
         attempt
@@ -120,12 +104,24 @@ let private pSelectStatement =
                 pFrom
                 spaces1
                 pWhere
-                sel)
+                (fun (exprs, ids, wh) ->
+                  let (first, rest) = ids
+                  SelectStatement {
+                    Expressions = exprs;
+                    Tables = List.map (fun x -> x.ToString()) (first :: rest);
+                    Filter = wh
+                  }))
         binary
             pSelect
             spaces1
             pFrom
-            sel2
+            (fun (exprs, ids) ->
+              let (first, rest) = ids
+              SelectStatement {
+                Expressions = exprs;
+                Tables = List.map (fun x -> x.ToString()) (first :: rest);
+                Filter = ConstExpr Int
+              })
     ]
 
 let private pInsertTable =
@@ -142,12 +138,6 @@ let private pInsertValues =
     spaces >>.
     pParens (sepBy1 pExpr (attempt pComma))
 
-let private ins (tbl, cols, vals) = {
-    Table = tbl
-    Columns = cols
-    Values = vals
-}
-
 let private pInsertStatement =
     ternary
         pInsertTable
@@ -155,7 +145,74 @@ let private pInsertStatement =
         pInsertColumns
         spaces
         pInsertValues
-        ins
+        (fun (tbl, cols, vals) ->
+          InsertStatement {
+            Table = tbl
+            Columns = cols
+            Values = vals
+          })
+
+let private pUpdateTable =
+    pstring "update" >>.
+    spaces1 >>.
+    pShortIdentifier
+
+let private pUpdateAssign =
+    binary
+        pShortIdentifier
+        (attempt (spaces >>. pstring "=" >>. spaces))
+        pExpr
+        id
+
+let private pSet =
+    pstring "set" >>.
+    spaces1 >>.
+    sepBy pUpdateAssign (attempt pComma)
+
+let private pUpdateStatement = 
+    choice [
+        attempt
+            (ternary
+                pUpdateTable
+                spaces1
+                pSet
+                spaces1
+                pWhere
+                (fun (tbl, set, filter) ->
+                  UpdateStatement {
+                    Table = tbl
+                    Assignments = set
+                    Filter = filter
+                  }))
+        binary
+            pUpdateTable
+            spaces1
+            pSet
+            (fun (tbl, set) ->
+              UpdateStatement {
+                Table = tbl
+                Assignments = set
+                Filter = ConstExpr Int
+              })
+    ]
+
+let private pDeleteTable =
+    pstring "delete" >>.
+    spaces1 >>.
+    pstring "from" >>.
+    spaces1 >>.
+    pShortIdentifier
+
+let private pDeleteStatement =
+    binary
+        pDeleteTable
+        spaces1
+        pWhere
+        (fun (tbl, filter) ->
+          DeleteStatement {
+            Table = tbl
+            Filter = filter
+          })
 
 let private pColumnDecl =
     binary
@@ -163,8 +220,6 @@ let private pColumnDecl =
         spaces1
         pType
         id
-
-let private ctable (name, cols) = { Name = name; Columns = cols }
 
 let private pCreateTableStatement =
     pstring "create" >>.
@@ -175,13 +230,19 @@ let private pCreateTableStatement =
         pShortIdentifier
         spaces
         (pParens (sepBy1 pColumnDecl (attempt pComma)))
-        ctable)
+        (fun (name, cols) ->
+          CreateStatement {
+            Name = name
+            Columns = cols
+          }))
 
 let private pStatement =
     choice [
-        pCreateTableStatement |>> CreateStatement
-        pSelectStatement      |>> SelectStatement
-        pInsertStatement      |>> InsertStatement
+        pSelectStatement
+        pInsertStatement
+        pUpdateStatement
+        pDeleteStatement
+        pCreateTableStatement
     ]
 
 let parse s =

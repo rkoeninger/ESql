@@ -25,20 +25,29 @@ let ``insert statement``() =
     assertEq expected (parse "insert into Tbl (X, Y, Z) values (1, 'a', 53434)")
 
 [<Test>]
-let ``update statement``() = ()
+let ``update statement``() =
+    let expected = UpdateStatement {
+        Table = "Tbl"
+        Assignments = ["X", ConstExpr Int; "Y", ConstExpr Varchar]
+        Filter = ConstExpr Int
+    }
+    assertEq expected (parse "update Tbl set X = 0, Y = 'a'")
+    assertEq expected (parse "update Tbl set X = 0, Y = 'a' where 0")
 
 [<Test>]
-let ``delete statement``() = ()
+let ``delete statement``() =
+    let expected = InsertStatement {
+        Table = "Tbl"
+        Columns = ["X"; "Y"]
+        Values = [ConstExpr Int; ConstExpr Varchar]
+    }
+    assertEq expected (parse "insert into Tbl (X, Y) values (0, 'a')")
 
 [<Test>]
 let ``create table statment``() =
     let expected = CreateStatement {
         Name = "Thingy"
-        Columns =
-        [
-            "X", Int
-            "Y", Varchar
-        ]
+        Columns = ["X", Int; "Y", Varchar]
     }
     assertEq expected (parse "create table Thingy ( X int, Y varchar )")
 
