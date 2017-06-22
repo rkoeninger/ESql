@@ -22,6 +22,10 @@ let private pType =
         stringReturn "nvarchar" NVarchar
     ]
 
+let private pComma = spaces >>. pchar ',' >>. spaces
+
+let private pAs = spaces1 >>. pstring "as" >>. spaces1
+
 let rec private ident (x: string) =
     if x.StartsWith "@" then Param(x.Substring 1)
     elif x.Contains "." then
@@ -45,7 +49,9 @@ let private binary p0 pfill0 p1 f = tuple2 (p0 .>> pfill0) p1 |>> f
 
 let private ternary p0 pfill0 p1 pfill1 p2 f = tuple3 (p0 .>> pfill0) (p1 .>> pfill1) p2 |>> f
 
-let private pConst =
+let private pParens p = between (pchar '(' .>> spaces) (spaces >>. pchar ')') p
+
+let private pConstExpr =
     choice [
         pint32 >>. preturn (ConstExpr Int)
         between (pchar '\'') (pchar '\'') (manySatisfy ((<>) '\'')) >>. preturn (ConstExpr Varchar)
@@ -60,20 +66,31 @@ let private pBinOp = // TODO: including in pExpr causes infinite loop?
         pExpr
         BinaryExpr
 
-let private pCast = // TODO: including in pExpr causes infinite loop?
+let private pAliasExpr = // TODO: including in pExpr causes infinite loop?
     binary
         pExpr
-        (attempt (spaces1 .>> pstring "as" .>> spaces1))
-        pType
-        CastExpr
+        (attempt pAs)
+        pShortIdentifier
+        AliasExpr
 
-let private pParens p = between (pchar '(' .>> spaces) (spaces >>. pchar ')') p
+let private pCountExpr =
+    pstring "count"
+    >>. spaces
+    >>. pParens pExpr
+    |>> CountExpr
+
+let private pCastExpr =
+    pstring "cast"
+    >>. spaces
+    >>. pParens (binary pExpr pComma pType CastExpr)
 
 do pExprRef := choice [
     pParens pExpr
+    pCountExpr
+    pCastExpr
     //pBinOp
-    //pCast
-    pConst
+    //pAliasExpr
+    pConstExpr
     pIdentifier |>> IdExpr
 ]
 
@@ -90,8 +107,6 @@ let private pJoin =
 let private pFrom =
     (pstring "from" >>. spaces1 >>. pIdentifier) .>>.
     many (attempt (spaces1 >>. pJoin))
-
-let private pComma = spaces >>. pchar ',' >>. spaces
 
 let private pSelect = pstring "select" >>. spaces1 >>. sepBy1 pExpr (attempt pComma)
 

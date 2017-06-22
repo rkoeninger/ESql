@@ -8,7 +8,7 @@ open Trilogy.Parser
 [<Test>]
 let ``select statement``() =
     let expected = SelectStatement {
-        Expressions = [IdExpr (Named "Name"); ConstExpr Int]
+        Expressions = [IdExpr(Named "Name"); ConstExpr Int]
         Tables = ["T1"; "T2"; "T3"]
         Filter = ConstExpr Int
     }
@@ -16,7 +16,25 @@ let ``select statement``() =
     assertEq expected (parse "select Name, 0 from T1 join T2 on 0 join T3 on 0 where 0")
 
 [<Test>]
-let ``insert statement``() =
+let ``select count``() =
+    let expected = SelectStatement {
+        Expressions = [CountExpr(IdExpr(Named "Thing"))]
+        Tables = ["Things"]
+        Filter = ConstExpr Int
+    }
+    assertEq expected (parse "select count(Thing) from Things")
+
+[<Test>]
+let ``select cast``() =
+    let expected = SelectStatement {
+        Expressions = [CastExpr(IdExpr(Named "Thing"), Int)]
+        Tables = ["Things"]
+        Filter = ConstExpr Int
+    }
+    assertEq expected (parse "select cast(Thing, int) from Things")
+
+[<Test>]
+let ``insert``() =
     let expected = InsertStatement {
         Table = "Tbl"
         Columns = ["X"; "Y"; "Z"]
@@ -25,7 +43,7 @@ let ``insert statement``() =
     assertEq expected (parse "insert into Tbl (X, Y, Z) values (1, 'a', 53434)")
 
 [<Test>]
-let ``update statement``() =
+let ``update``() =
     let expected = UpdateStatement {
         Table = "Tbl"
         Assignments = ["X", ConstExpr Int; "Y", ConstExpr Varchar]
@@ -35,7 +53,7 @@ let ``update statement``() =
     assertEq expected (parse "update Tbl set X = 0, Y = 'a' where 0")
 
 [<Test>]
-let ``delete statement``() =
+let ``delete``() =
     let expected = InsertStatement {
         Table = "Tbl"
         Columns = ["X"; "Y"]
@@ -44,7 +62,7 @@ let ``delete statement``() =
     assertEq expected (parse "insert into Tbl (X, Y) values (0, 'a')")
 
 [<Test>]
-let ``create statment``() =
+let ``create``() =
     let expected = CreateStatement {
         Name = "Thingy"
         Columns = ["X", Int; "Y", Varchar]
@@ -52,7 +70,7 @@ let ``create statment``() =
     assertEq expected (parse "create table Thingy ( X int, Y varchar )")
 
 [<Test>]
-let ``multiple statements``() =
+let ``create, select``() =
     let expected =
         [
             CreateStatement {
@@ -60,7 +78,7 @@ let ``multiple statements``() =
                 Columns = ["X", Int; "Y", Varchar]
             }
             SelectStatement {
-                Expressions = [IdExpr (Named "Y")]
+                Expressions = [IdExpr(Named "Y")]
                 Tables = ["Tbl"]
                 Filter = ConstExpr Int
             }
