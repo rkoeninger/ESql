@@ -76,8 +76,14 @@ type Delete = {
     Filter: SqlExpr
 }
 
+type CreateTable = {
+    Name: string
+    Columns: (string * SqlType) list
+}
+
 type Statement =
     | SelectStatement of Select
     | InsertStatement of Insert
     | UpdateStatement of Update
     | DeleteStatement of Delete
+    | CreateStatement of CreateTable

@@ -67,7 +67,7 @@ let private pCast = // TODO: including in pExpr causes infinite loop?
         pType
         CastExpr
 
-let private pParens p = between (pchar '(') (pchar ')') p
+let private pParens p = between (pchar '(' .>> spaces) (spaces >>. pchar ')') p
 
 do pExprRef := choice [
     pParens pExpr
@@ -128,6 +128,35 @@ let private pSelectStatement =
             sel2
     ]
 
+let private pInsertTable =
+    pstring "insert" >>.
+    spaces1 >>.
+    pstring "into" >>.
+    spaces1 >>.
+    pShortIdentifier
+
+let private pInsertColumns = pParens (sepBy1 pShortIdentifier (attempt pComma))
+
+let private pInsertValues =
+    pstring "values" >>.
+    spaces >>.
+    pParens (sepBy1 pExpr (attempt pComma))
+
+let private ins (tbl, cols, vals) = {
+    Table = tbl
+    Columns = cols
+    Values = vals
+}
+
+let private pInsertStatement =
+    ternary
+        pInsertTable
+        spaces
+        pInsertColumns
+        spaces
+        pInsertValues
+        ins
+
 let private pColumnDecl =
     binary
         pShortIdentifier
@@ -135,12 +164,27 @@ let private pColumnDecl =
         pType
         id
 
+let private ctable (name, cols) = { Name = name; Columns = cols }
+
 let private pCreateTableStatement =
-    pstring "create" >>. spaces1 >>.
-    pstring "table" >>. spaces >>.
-    pParens (sepBy1 pColumnDecl (attempt pComma))
+    pstring "create" >>.
+    spaces1 >>.
+    pstring "table" >>.
+    spaces1 >>.
+    (binary
+        pShortIdentifier
+        spaces
+        (pParens (sepBy1 pColumnDecl (attempt pComma)))
+        ctable)
+
+let private pStatement =
+    choice [
+        pCreateTableStatement |>> CreateStatement
+        pSelectStatement      |>> SelectStatement
+        pInsertStatement      |>> InsertStatement
+    ]
 
 let parse s =
-    match run pSelectStatement s with
+    match run pStatement s with
     | Success(result, _, _) -> result
     | Failure(error, _, _) -> failwith error
