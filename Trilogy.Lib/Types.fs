@@ -38,15 +38,20 @@ type Projection = (string option * SqlType) list
 type SqlExpr =
     | ConstExpr of SqlType
     | IdExpr of Id
-    //| AliasExpr of SqlExpr * string
     | CastExpr of SqlExpr * SqlType
     | CountExpr of SqlExpr
     | BinaryExpr of SqlExpr * Op * SqlExpr
 
+type Selection =
+    | Unaliased of SqlExpr
+    | Aliased of SqlExpr * string
+    // TODO: Star of string option
+    // stars don't appear in arbitrary positions in expressions
+
 type Sources = (string * Columns) list
 
 type SelectStmt = {
-    Selections: SqlExpr list
+    Selections: Selection list
     Sources: Sources
 }
 
@@ -60,7 +65,7 @@ type Parameters = Map<string, SqlTypeBounds>
 type Mode = Union | Intersection
 
 type Select = {
-    Expressions: SqlExpr list
+    Expressions: Selection list
     Tables: string list
     Filter: SqlExpr
 }

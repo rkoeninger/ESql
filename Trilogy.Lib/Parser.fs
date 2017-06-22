@@ -24,7 +24,7 @@ let private pType =
 
 let private pComma = spaces >>. pchar ',' >>. spaces
 
-//let private pAs = spaces1 >>. pstring "as" >>. spaces1
+let private pAs = spaces1 >>. pstring "as" >>. spaces1
 
 let rec private ident (x: string) =
     if x.StartsWith "@" then Param(x.Substring 1)
@@ -107,7 +107,13 @@ let private pFrom =
     (pstring "from" >>. spaces1 >>. pIdentifier) .>>.
     many (attempt (spaces1 >>. pJoin))
 
-let private pSelect = pstring "select" >>. spaces1 >>. sepBy1 pExpr (attempt pComma)
+let private pSelection =
+    choice [
+        attempt (binary pExpr pAs pShortIdentifier Aliased)
+        pExpr |>> Unaliased
+    ]
+
+let private pSelect = pstring "select" >>. spaces1 >>. sepBy1 pSelection (attempt pComma)
 
 let private pSelectStatement =
     choice [

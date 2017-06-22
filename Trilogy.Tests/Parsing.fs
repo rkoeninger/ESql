@@ -8,7 +8,7 @@ open Trilogy.Parser
 [<Test>]
 let ``select statement``() =
     let expected = SelectStatement {
-        Expressions = [IdExpr(Named "Name"); ConstExpr Int]
+        Expressions = [Unaliased(IdExpr(Named "Name")); Unaliased(ConstExpr Int)]
         Tables = ["T1"; "T2"; "T3"]
         Filter = ConstExpr Int
     }
@@ -18,7 +18,7 @@ let ``select statement``() =
 [<Test>]
 let ``select count``() =
     let expected = SelectStatement {
-        Expressions = [CountExpr(IdExpr(Named "Thing"))]
+        Expressions = [Unaliased(CountExpr(IdExpr(Named "Thing")))]
         Tables = ["Things"]
         Filter = ConstExpr Int
     }
@@ -27,11 +27,20 @@ let ``select count``() =
 [<Test>]
 let ``select cast``() =
     let expected = SelectStatement {
-        Expressions = [CastExpr(IdExpr(Named "Thing"), Int)]
+        Expressions = [Unaliased(CastExpr(IdExpr(Named "Thing"), Int))]
         Tables = ["Things"]
         Filter = ConstExpr Int
     }
     assertEq expected (parse "select cast(Thing, int) from Things")
+
+[<Test>]
+let ``select as``() =
+    let expected = SelectStatement {
+        Expressions = [Aliased(ConstExpr Int, "X")]
+        Tables = ["Y"]
+        Filter = ConstExpr Int
+    }
+    assertEq expected (parse "select 0 as X from Y")
 
 [<Test>]
 let ``insert``() =
@@ -78,7 +87,7 @@ let ``create, select``() =
                 Columns = ["X", Int; "Y", Varchar]
             }
             SelectStatement {
-                Expressions = [IdExpr(Named "Y")]
+                Expressions = [Unaliased(IdExpr(Named "Y"))]
                 Tables = ["Tbl"]
                 Filter = ConstExpr Int
             }
