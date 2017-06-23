@@ -116,9 +116,9 @@ let private pSelectStatement =
                 (fun (exprs, ids, wh) ->
                   let (first, rest) = ids
                   SelectStatement {
-                    Selections = exprs;
-                    Tables = List.map (fun x -> x.ToString()) (first :: rest);
-                    Filter = wh
+                    Selections = exprs
+                    Tables = List.map (fun x -> x.ToString()) (first :: rest)
+                    Filter = Some wh
                   }))
         binary
             pSelect
@@ -127,9 +127,9 @@ let private pSelectStatement =
             (fun (exprs, ids) ->
               let (first, rest) = ids
               SelectStatement {
-                Selections = exprs;
-                Tables = List.map (fun x -> x.ToString()) (first :: rest);
-                Filter = ConstExpr Int
+                Selections = exprs
+                Tables = List.map (fun x -> x.ToString()) (first :: rest)
+                Filter = None
               })
     ]
 
@@ -187,11 +187,11 @@ let private pUpdateStatement =
                 pSet
                 spaces1
                 pWhere
-                (fun (tbl, set, filter) ->
+                (fun (tbl, set, wh) ->
                   UpdateStatement {
                     Table = tbl
                     Assignments = set
-                    Filter = filter
+                    Filter = Some wh
                   }))
         binary
             pUpdateTable
@@ -201,7 +201,7 @@ let private pUpdateStatement =
               UpdateStatement {
                 Table = tbl
                 Assignments = set
-                Filter = ConstExpr Int
+                Filter = None
               })
     ]
 

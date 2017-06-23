@@ -64,7 +64,7 @@ type Mode = Union | Intersection
 type Select = {
     Selections: Selection list
     Tables: string list
-    Filter: SqlExpr
+    Filter: SqlExpr option
 }
 
 type Insert = {
@@ -76,7 +76,7 @@ type Insert = {
 type Update = {
     Table: string
     Assignments: (string * SqlExpr) list
-    Filter: SqlExpr
+    Filter: SqlExpr option
 }
 
 type Delete = {
