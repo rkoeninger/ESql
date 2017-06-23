@@ -55,29 +55,29 @@ let ``select cast as``() =
 
 [<Test>]
 let ``select count``() =
-    // select count(*) from People where Age >= 21
-    let sel = [Unaliased(CountExpr(IdExpr Star))]
+    // select count(Name) from People where Age >= 21
+    let sel = [Unaliased(CountExpr(IdExpr(Named "Name")))]
     let stmt = inferProjection { Selections = sel; Sources = [people] }
     assertEq [None, Int] stmt
 
 [<Test>]
 let ``select count as``() =
-    // select count(*) as Drinkers from People where Age >= 21
-    let sel = [Aliased(CountExpr(IdExpr Star), "Drinkers")]
+    // select count(Name) as Drinkers from People where Age >= 21
+    let sel = [Aliased(CountExpr(IdExpr(Named "Name")), "Drinkers")]
     let stmt = inferProjection { Selections = sel; Sources = [people] }
     assertEq [Some "Drinkers", Int] stmt
 
 [<Test>]
 let ``select *``() =
     // select * from People
-    let sel = [Unaliased(IdExpr Star)]
+    let sel = [Star None]
     let stmt = inferProjection { Selections = sel; Sources = [people] }
     assertEq [Some "Name", Varchar; Some "Phone", Varchar; Some "Email", Varchar] stmt
 
 [<Test>]
 let ``select Table.*``() =
     // select People.* from People
-    let sel = [Unaliased(IdExpr(Qualified("People", Star)))]
+    let sel = [Star(Some "People")]
     let stmt = inferProjection { Selections = sel; Sources = [people; addresses] }
     assertEq [Some "Name", Varchar; Some "Phone", Varchar; Some "Email", Varchar] stmt
 

@@ -24,10 +24,8 @@ type Id =
     | Named of string
     | Param of string
     | Unnamed
-    | Star
     override this.ToString() =
         match this with
-        | Star -> "*"
         | Unnamed -> "_"
         | Param x -> sprintf "@%s" x
         | Named x -> x
@@ -45,8 +43,7 @@ type SqlExpr =
 type Selection =
     | Unaliased of SqlExpr
     | Aliased of SqlExpr * string
-    // TODO: Star of string option
-    // stars don't appear in arbitrary positions in expressions
+    | Star of string option
 
 type Sources = (string * Columns) list
 

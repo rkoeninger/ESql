@@ -12,14 +12,12 @@ let inferProjection (stmt: SelectStmt) : Projection =
         match id with
         | Qualified _ -> failwith "Shouldn't have Qualified here"
         | Named name -> [cols |> List.find (fst >> (=) name) |> mapFst Some]
-        | Star -> List.map (mapFst Some) cols
         | Unnamed -> failwith "Shouldn't have Unnamed here"
         | Param _ -> failwith "Shouldn't have Param here"
     let analyzeId (id: Id) (sources: Sources) =
         match id with
         | Qualified(qualifier, id) -> sources |> List.find (fst >> (=) qualifier) |> snd |> analyzeIdForTable id
         | Named name -> [sources |> List.map snd |> List.concat |> List.filter (fst >> (=) name) |> single |> mapFst Some]
-        | Star -> sources |> List.map snd |> List.concat |> List.map (mapFst Some)
         | Unnamed -> failwith "Shouldn't have Unnamed here"
         | Param _ -> failwith "Shouldn't have Param here"
     let rec analyzeExpr expr =
@@ -32,6 +30,8 @@ let inferProjection (stmt: SelectStmt) : Projection =
     let analyzeSelection = function
         | Unaliased expr -> analyzeExpr expr
         | Aliased(expr, name) -> [Some name, analyzeExpr expr |> single |> snd]
+        | Star(Some table) -> stmt.Sources |> List.find (fst >> (=) table) |> snd |> List.map (mapFst Some)
+        | Star _ -> stmt.Sources |> List.map snd |> List.concat |> List.map (mapFst Some)
     stmt.Selections |> List.map analyzeSelection |> List.concat
 
 let singleType = Set.singleton >> Limits

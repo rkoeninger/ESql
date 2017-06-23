@@ -35,11 +35,7 @@ let rec private ident (x: string) =
 
 let private isIdentifierChar ch = Char.IsLetter ch || Char.IsDigit ch || ch = '_' || ch = '.' || ch = '@'
 
-let private pIdentifier =
-    choice [
-        stringReturn "*" Star
-        manySatisfy isIdentifierChar |>> ident
-    ]
+let private pIdentifier = manySatisfy isIdentifierChar |>> ident
 
 let private isShortIdentifierChar ch = Char.IsLetter ch || Char.IsDigit ch || ch = '_'
 
