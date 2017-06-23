@@ -127,7 +127,7 @@ let private pSelectStatement =
                 (fun (exprs, ids, wh) ->
                   let (first, rest) = ids
                   SelectStatement {
-                    Expressions = exprs;
+                    Selections = exprs;
                     Tables = List.map (fun x -> x.ToString()) (first :: rest);
                     Filter = wh
                   }))
@@ -138,7 +138,7 @@ let private pSelectStatement =
             (fun (exprs, ids) ->
               let (first, rest) = ids
               SelectStatement {
-                Expressions = exprs;
+                Selections = exprs;
                 Tables = List.map (fun x -> x.ToString()) (first :: rest);
                 Filter = ConstExpr Int
               })

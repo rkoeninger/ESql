@@ -1,7 +1,7 @@
 ﻿module Trilogy.Tests.QueryProjection
 
 open NUnit.Framework
-open Trilogy.Tests.Assertions
+open Assertions
 open Trilogy
 open Trilogy.Analysis
 

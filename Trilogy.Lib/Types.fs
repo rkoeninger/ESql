@@ -65,7 +65,7 @@ type Parameters = Map<string, SqlTypeBounds>
 type Mode = Union | Intersection
 
 type Select = {
-    Expressions: Selection list
+    Selections: Selection list
     Tables: string list
     Filter: SqlExpr
 }

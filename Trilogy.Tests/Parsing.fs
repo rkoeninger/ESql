@@ -1,14 +1,14 @@
 ﻿module Trilogy.Tests.Parsing
 
 open NUnit.Framework
-open Trilogy.Tests.Assertions
+open Assertions
 open Trilogy
 open Trilogy.Parser
 
 [<Test>]
 let ``select statement``() =
     let expected = SelectStatement {
-        Expressions = [Unaliased(IdExpr(Named "Name")); Unaliased(ConstExpr Int)]
+        Selections = [Unaliased(IdExpr(Named "Name")); Unaliased(ConstExpr Int)]
         Tables = ["T1"; "T2"; "T3"]
         Filter = ConstExpr Int
     }
@@ -18,7 +18,7 @@ let ``select statement``() =
 [<Test>]
 let ``select count``() =
     let expected = SelectStatement {
-        Expressions = [Unaliased(CountExpr(IdExpr(Named "Thing")))]
+        Selections = [Unaliased(CountExpr(IdExpr(Named "Thing")))]
         Tables = ["Things"]
         Filter = ConstExpr Int
     }
@@ -27,7 +27,7 @@ let ``select count``() =
 [<Test>]
 let ``select cast``() =
     let expected = SelectStatement {
-        Expressions = [Unaliased(CastExpr(IdExpr(Named "Thing"), Int))]
+        Selections = [Unaliased(CastExpr(IdExpr(Named "Thing"), Int))]
         Tables = ["Things"]
         Filter = ConstExpr Int
     }
@@ -36,7 +36,7 @@ let ``select cast``() =
 [<Test>]
 let ``select as``() =
     let expected = SelectStatement {
-        Expressions = [Aliased(ConstExpr Int, "X")]
+        Selections = [Aliased(ConstExpr Int, "X")]
         Tables = ["Y"]
         Filter = ConstExpr Int
     }
@@ -87,7 +87,7 @@ let ``create, select``() =
                 Columns = ["X", Int; "Y", Varchar]
             }
             SelectStatement {
-                Expressions = [Unaliased(IdExpr(Named "Y"))]
+                Selections = [Unaliased(IdExpr(Named "Y"))]
                 Tables = ["Tbl"]
                 Filter = ConstExpr Int
             }
