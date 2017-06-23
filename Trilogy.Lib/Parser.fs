@@ -16,10 +16,10 @@ let private pOperator =
 
 let private pType =
     choice [
-        stringReturn "bit"      Bit
-        stringReturn "int"      Int
-        stringReturn "varchar"  Varchar
-        stringReturn "nvarchar" NVarchar
+        stringCIReturn "bit"      Bit
+        stringCIReturn "int"      Int
+        stringCIReturn "varchar"  Varchar
+        stringCIReturn "nvarchar" NVarchar
     ]
 
 let private pComma = spaces >>. pchar ',' >>. spaces
@@ -62,21 +62,14 @@ let private pBinOp = // TODO: including in pExpr causes infinite loop?
         pExpr
         BinaryExpr
 
-//let private pAliasExpr = // TODO: including in pExpr causes infinite loop?
-//    binary
-//        pExpr
-//        (attempt pAs)
-//        pShortIdentifier
-//        AliasExpr
-
 let private pCountExpr =
-    pstring "count"
+    pstringCI "count"
     >>. spaces
     >>. pParens pExpr
     |>> CountExpr
 
 let private pCastExpr =
-    pstring "cast"
+    pstringCI "cast"
     >>. spaces
     >>. pParens (binary pExpr pComma pType CastExpr)
 
@@ -90,17 +83,17 @@ do pExprRef := choice [
 ]
 
 let private pWhere =
-    pstring "where" >>. spaces1 >>.
+    pstringCI "where" >>. spaces1 >>.
     pExpr
 
 let private pJoin =
-    pstring "join" >>. spaces1 >>.
+    pstringCI "join" >>. spaces1 >>.
     pIdentifier .>> spaces1 .>>
-    pstring "on" .>> spaces1 .>>
+    pstringCI "on" .>> spaces1 .>>
     pExpr
 
 let private pFrom =
-    (pstring "from" >>. spaces1 >>. pIdentifier) .>>.
+    (pstringCI "from" >>. spaces1 >>. pIdentifier) .>>.
     many (attempt (spaces1 >>. pJoin))
 
 let private pSelection =
@@ -109,7 +102,7 @@ let private pSelection =
         pExpr |>> Unaliased
     ]
 
-let private pSelect = pstring "select" >>. spaces1 >>. sepBy1 pSelection (attempt pComma)
+let private pSelect = pstringCI "select" >>. spaces1 >>. sepBy1 pSelection (attempt pComma)
 
 let private pSelectStatement =
     choice [
@@ -141,16 +134,16 @@ let private pSelectStatement =
     ]
 
 let private pInsertTable =
-    pstring "insert" >>.
+    pstringCI "insert" >>.
     spaces1 >>.
-    pstring "into" >>.
+    pstringCI "into" >>.
     spaces1 >>.
     pShortIdentifier
 
 let private pInsertColumns = pParens (sepBy1 pShortIdentifier (attempt pComma))
 
 let private pInsertValues =
-    pstring "values" >>.
+    pstringCI "values" >>.
     spaces >>.
     pParens (sepBy1 pExpr (attempt pComma))
 
@@ -169,7 +162,7 @@ let private pInsertStatement =
           })
 
 let private pUpdateTable =
-    pstring "update" >>.
+    pstringCI "update" >>.
     spaces1 >>.
     pShortIdentifier
 
@@ -181,7 +174,7 @@ let private pUpdateAssign =
         id
 
 let private pSet =
-    pstring "set" >>.
+    pstringCI "set" >>.
     spaces1 >>.
     sepBy pUpdateAssign (attempt pComma)
 
@@ -213,9 +206,9 @@ let private pUpdateStatement =
     ]
 
 let private pDeleteTable =
-    pstring "delete" >>.
+    pstringCI "delete" >>.
     spaces1 >>.
-    pstring "from" >>.
+    pstringCI "from" >>.
     spaces1 >>.
     pShortIdentifier
 
@@ -238,9 +231,9 @@ let private pColumnDecl =
         id
 
 let private pCreateStatement =
-    pstring "create" >>.
+    pstringCI "create" >>.
     spaces1 >>.
-    pstring "table" >>.
+    pstringCI "table" >>.
     spaces1 >>.
     (binary
         pShortIdentifier

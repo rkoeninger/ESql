@@ -94,3 +94,8 @@ let ``create, select``() =
         ]
     assertEq expected (parseAll "create table Tbl (X int, Y varchar)
                                  select Y from Tbl where 5")
+
+[<Test>]
+let ``case insensitivity``() =
+    parseAll "SELECT X From Table"
+    ()
