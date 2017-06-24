@@ -11,7 +11,7 @@ let expectErr f =
         failwith "Error expected"
     with
         _ -> ()
-    
+
 // create table People ( Name varchar(64), Phone varchar(16), Email varchar(32) )
 let people = "People", ["Name", Varchar; "Phone", Varchar; "Email", Varchar]
 
@@ -24,7 +24,7 @@ let ``select``() =
     let sel = [Unaliased(IdExpr(Named "Name")); Unaliased(IdExpr(Named "Email"))]
     let stmt = inferProjection { Selections = sel; Sources = [people] }
     assertEq [Some "Name", Varchar; Some "Email", Varchar] stmt
-        
+
 [<Test>]
 let ``select literal varchar``() =
     // select 'literal'

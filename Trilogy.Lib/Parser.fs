@@ -7,11 +7,11 @@ let private pExpr, pExprRef = createParserForwardedToRef<SqlExpr, unit>()
 
 let private pOperator =
     choice [
-        stringReturn "="   Eq
-        stringReturn ">"   Gt
-        stringReturn "<"   Lt
-        stringReturn "and" And
-        stringReturn "or"  Or
+        stringReturn   "="   Eq
+        stringReturn   ">"   Gt
+        stringReturn   "<"   Lt
+        stringCIReturn "and" And
+        stringCIReturn "or"  Or
     ]
 
 let private pType =
