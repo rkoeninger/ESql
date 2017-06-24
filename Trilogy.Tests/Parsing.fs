@@ -22,6 +22,24 @@ let ``select statement``() =
     assertEq expected2 (parse "select Name, 0 from T1 join T2 on 0 join T3 on 0 where 0")
 
 [<Test>]
+let ``select *``() =
+    let expected = SelectStatement {
+        Selections = [Star None]
+        Tables = ["Table"]
+        Filter = None
+    }
+    assertEq expected (parse "select * from Table")
+
+[<Test>]
+let ``select Table.*``() =
+    let expected = SelectStatement {
+        Selections = [Star(Some "Table")]
+        Tables = ["Table"]
+        Filter = None
+    }
+    assertEq expected (parse "select Table.* from Table")
+
+[<Test>]
 let ``select count``() =
     let expected = SelectStatement {
         Selections = [Unaliased(CountExpr(IdExpr(Named "Thing")))]

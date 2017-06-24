@@ -27,19 +27,21 @@ let private pComma = spaces >>. pchar ',' >>. spaces
 let private pAs = spaces1 >>. pstring "as" >>. spaces1
 
 let rec private ident (x: string) =
-    if x.StartsWith "@" then Param(x.Substring 1)
+    if x.StartsWith "@" then
+        Param(x.Substring 1)
     elif x.Contains "." then
         let i = x.IndexOf "."
         Qualified(x.Substring(0, i), ident (x.Substring(i + 1, x.Length - i - 1)))
-    else Named x
+    else
+        Named x
 
 let private isIdentifierChar ch = Char.IsLetter ch || Char.IsDigit ch || ch = '_' || ch = '.' || ch = '@'
 
-let private pIdentifier = manySatisfy isIdentifierChar |>> ident
+let private pIdentifier = many1Satisfy isIdentifierChar |>> ident
 
 let private isShortIdentifierChar ch = Char.IsLetter ch || Char.IsDigit ch || ch = '_'
 
-let private pShortIdentifier = manySatisfy isShortIdentifierChar
+let private pShortIdentifier = many1Satisfy isShortIdentifierChar
 
 let private binary p0 pfill0 p1 f = tuple2 (p0 .>> pfill0) p1 |>> f
 
@@ -83,69 +85,62 @@ do pExprRef := choice [
 ]
 
 let private pWhere =
-    pstringCI "where" >>. spaces1 >>.
-    pExpr
+    pstringCI "where"
+    >>. spaces1
+    >>. pExpr
 
 let private pJoin =
-    pstringCI "join" >>. spaces1 >>.
-    pIdentifier .>> spaces1 .>>
-    pstringCI "on" .>> spaces1 .>>
-    pExpr
+    pstringCI "join"
+    >>. spaces1
+    >>. pIdentifier
+    .>> spaces1
+    .>> pstringCI "on"
+    .>> spaces1
+    .>> pExpr
 
 let private pFrom =
-    (pstringCI "from" >>. spaces1 >>. pIdentifier) .>>.
-    many (attempt (spaces1 >>. pJoin))
+    (pstringCI "from" >>. spaces1 >>. pIdentifier)
+    .>>. many (attempt (spaces1 >>. pJoin))
 
 let private pSelection =
     choice [
+        attempt (pShortIdentifier .>> pstring ".*" |>> (Some >> Star))
+        stringReturn "*" (Star None)
         attempt (binary pExpr pAs pShortIdentifier Aliased)
         pExpr |>> Unaliased
     ]
 
-let private pSelect = pstringCI "select" >>. spaces1 >>. sepBy1 pSelection (attempt pComma)
+let private pSelect =
+    pstringCI "select"
+    >>. spaces1
+    >>. sepBy1 pSelection (attempt pComma)
 
 let private pSelectStatement =
-    choice [
-        attempt
-            (ternary
-                pSelect
-                spaces1
-                pFrom
-                spaces1
-                pWhere
-                (fun (exprs, ids, wh) ->
-                  let (first, rest) = ids
-                  SelectStatement {
-                    Selections = exprs
-                    Tables = List.map (fun x -> x.ToString()) (first :: rest)
-                    Filter = Some wh
-                  }))
-        binary
-            pSelect
-            spaces1
-            pFrom
-            (fun (exprs, ids) ->
-              let (first, rest) = ids
-              SelectStatement {
-                Selections = exprs
-                Tables = List.map (fun x -> x.ToString()) (first :: rest)
-                Filter = None
-              })
-    ]
+    tuple3
+        pSelect
+        (spaces1 >>. pFrom)
+        (opt (spaces1 >>. pWhere))
+    |>> (fun (s, f, w) ->
+            let (x, xs) = f
+            SelectStatement {
+                Selections = s
+                Tables = List.map string (x :: xs)
+                Filter = w
+            })
 
 let private pInsertTable =
-    pstringCI "insert" >>.
-    spaces1 >>.
-    pstringCI "into" >>.
-    spaces1 >>.
-    pShortIdentifier
+    pstringCI "insert"
+    >>. spaces1
+    >>. pstringCI "into"
+    >>. spaces1
+    >>. pShortIdentifier
 
 let private pInsertColumns = pParens (sepBy1 pShortIdentifier (attempt pComma))
 
 let private pInsertValues =
-    pstringCI "values" >>.
-    spaces >>.
-    pParens (sepBy1 pExpr (attempt pComma))
+    pstringCI "values"
+    >>. spaces
+    >>. pParens (sepBy1 pExpr (attempt pComma))
 
 let private pInsertStatement =
     ternary
@@ -174,43 +169,28 @@ let private pUpdateAssign =
         id
 
 let private pSet =
-    pstringCI "set" >>.
-    spaces1 >>.
-    sepBy pUpdateAssign (attempt pComma)
+    pstringCI "set"
+    >>. spaces1
+    >>. sepBy pUpdateAssign (attempt pComma)
 
-let private pUpdateStatement = 
-    choice [
-        attempt
-            (ternary
-                pUpdateTable
-                spaces1
-                pSet
-                spaces1
-                pWhere
-                (fun (tbl, set, wh) ->
-                  UpdateStatement {
-                    Table = tbl
-                    Assignments = set
-                    Filter = Some wh
-                  }))
-        binary
-            pUpdateTable
-            spaces1
-            pSet
-            (fun (tbl, set) ->
-              UpdateStatement {
-                Table = tbl
-                Assignments = set
-                Filter = None
-              })
-    ]
+let private pUpdateStatement =
+    tuple3
+        pUpdateTable
+        (spaces1 >>. pSet)
+        (opt (spaces1 >>. pWhere))
+    |>> (fun (t, s, w) ->
+            UpdateStatement {
+                Table = t
+                Assignments = s
+                Filter = w
+            })
 
 let private pDeleteTable =
-    pstringCI "delete" >>.
-    spaces1 >>.
-    pstringCI "from" >>.
-    spaces1 >>.
-    pShortIdentifier
+    pstringCI "delete"
+    >>. spaces1
+    >>. pstringCI "from"
+    >>. spaces1
+    >>. pShortIdentifier
 
 let private pDeleteStatement =
     binary
