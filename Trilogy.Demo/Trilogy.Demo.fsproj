@@ -46,7 +46,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
     <Reference Include="Trilogy.Lib">
-      <HintPath>C:\Users\Bort\Workspace\Trilogy\Trilogy.Lib\bin\Debug\Trilogy.Lib.dll</HintPath>
+      <HintPath>..\Trilogy.Lib\bin\Debug\Trilogy.Lib.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
