@@ -45,7 +45,7 @@ type QueryProvider(config: TypeProviderConfig) as this =
         )
 
         parseQueryProvider.DefineStaticParameters(
-            [],
+            [ProvidedStaticParameter("Text", typeof<string>)],
             fun typeName args ->
                 let text = args.[0] :?> string
                 let templateType = ProvidedTypeDefinition(asm, ns, typeName, Some typeof<obj>, IsErased = false)
