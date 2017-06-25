@@ -1,3 +1,5 @@
-solution: Trilogy.sln
 before_build:
-  - nuget restore
+  - nuget restore Trilogy.sln
+  - nuget restore Trilogy.Demo\Trilogy.Demo.sln
+build_script:
+  - .\build.bat
