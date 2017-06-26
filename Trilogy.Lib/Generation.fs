@@ -4,6 +4,7 @@ open System.IO
 open System.Reflection
 open Microsoft.FSharp.Core.CompilerServices
 open Microsoft.FSharp.Collections
+open Microsoft.FSharp.Quotations
 open ProviderImplementation.ProvidedTypes
 
 // https://github.com/fsprojects/SQLProvider/blob/5f6352e49fee5b743940100c6fb89bb70c62d127/src/SQLProvider/SqlDesignTime.fs
@@ -27,6 +28,17 @@ type QueryProvider(config: TypeProviderConfig) as this =
         t.AddMember ctor
 
     let loadQueries (t: ProvidedTypeDefinition) (path: string) =
+        let name = "Thing"
+        let tipe = typeof<string>
+        let field = ProvidedField("_" + name, tipe)
+        field.SetFieldAttributes(FieldAttributes.Private)
+
+        let property = ProvidedProperty(name, tipe)
+        property.GetterCode <- (fun _ -> <@@ %%Expr.Value(path) :> string @@>)
+        //property.SetterCode <- (fun (this :: arg :: _) -> <@@ %%Expr.FieldSet(this, field, arg) |> ignore @@>)
+
+        t.AddMember field
+        t.AddMember property
         ()
 
     let parseQuery (t: ProvidedTypeDefinition) (text: string) =

@@ -5,5 +5,6 @@ type Db = Trilogy.LoadQueries<"Sql">
 [<EntryPoint>]
 let main argv =
     let db = Db()
-    printfn "%A" argv
+    //db.Thing <- "hi"
+    printfn "%A" db.Thing
     0
