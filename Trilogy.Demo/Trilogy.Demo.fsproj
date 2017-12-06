@@ -67,7 +67,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
     <Reference Include="Trilogy.Lib">
-      <HintPath>..\Trilogy.Lib\bin\Debug\Trilogy.Lib.dll</HintPath>
+      <HintPath>..\Trilogy.Lib\bin\$(Configuration)\Trilogy.Lib.dll</HintPath>
     </Reference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

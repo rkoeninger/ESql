@@ -8,3 +8,5 @@ install:
 script:
   - xbuild /p:Configuration=Release ./Trilogy.Tests/Trilogy.Tests.sln
   - mono ./packages/NUnit.ConsoleRunner.3.6.0/tools/nunit3-console.exe ./Trilogy.Tests/bin/Release/Trilogy.Tests.dll
+  - xbuild /p:Configuration=Release ./Trilogy.Demo/Trilogy.Demo.sln
+  - mono ./Trilogy.Demo/bin/Release/Trilogy.Demo.exe
