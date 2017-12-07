@@ -6,9 +6,9 @@ install:
   - nuget restore Trilogy.sln
   - nuget restore Trilogy.Tests/Trilogy.Tests.sln
   - nuget restore Trilogy.Demo/Trilogy.Demo.sln
-  - nuget install NUnit.ConsoleRunner -Version 3.6.0 -OutputDirectory packages
+  - nuget install NUnit.ConsoleRunner -Version 3.7.0 -OutputDirectory packages
 script:
   - xbuild /p:Configuration=Release ./Trilogy.Tests/Trilogy.Tests.sln
-  - mono ./packages/NUnit.ConsoleRunner.3.6.0/tools/nunit3-console.exe ./Trilogy.Tests/bin/Release/Trilogy.Tests.dll
+  - mono ./packages/NUnit.ConsoleRunner.3.7.0/tools/nunit3-console.exe ./Trilogy.Tests/bin/Release/Trilogy.Tests.dll
   - xbuild /p:Configuration=Release ./Trilogy.Demo/Trilogy.Demo.sln
   - mono ./Trilogy.Demo/bin/Release/Trilogy.Demo.exe
