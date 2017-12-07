@@ -4,6 +4,8 @@ language: csharp
 solution: Trilogy.sln
 install:
   - nuget restore Trilogy.sln
+  - nuget restore Trilogy.Tests/Trilogy.Tests.sln
+  - nuget restore Trilogy.Demo/Trilogy.Demo.sln
   - nuget install NUnit.ConsoleRunner -Version 3.6.0 -OutputDirectory packages
 script:
   - xbuild /p:Configuration=Release ./Trilogy.Tests/Trilogy.Tests.sln
