@@ -1,5 +1,6 @@
 before_build:
   - nuget restore Trilogy.sln
+  - nuget restore Trilogy.Tests\Trilogy.Tests.sln
   - nuget restore Trilogy.Demo\Trilogy.Demo.sln
 build_script:
   - .\build.bat
