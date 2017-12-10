@@ -1,1 +1,1 @@
-select Name, Phone from People
+select Name, Phone from People where Name = 'a'
