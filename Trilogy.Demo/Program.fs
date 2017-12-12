@@ -1,11 +1,18 @@
 ﻿module Trilogy.Demo
 
-type Db = Trilogy.LoadQueries<"Sql">
+type Person = Trilogy.ParseQuery<"
+    create table People
+    (
+        Name varchar,
+        Phone varchar,
+        Age int
+    )
+">
 
 [<EntryPoint>]
 let main argv =
-    let db = Db()
-    printfn "%A" db.Name
-    printfn "%A" db.Phone
-    printfn "%A" db.Age
+    let p = Person()
+    printfn "%A" p.Name
+    printfn "%A" p.Phone
+    printfn "%A" p.Age
     0

@@ -78,7 +78,11 @@ type QueryProvider(config: TypeProviderConfig) as this =
             examineStatment t stmt
 
     let parseQuery (t: ProvidedTypeDefinition) (text: string) =
-        ()
+        match parse text with
+        | CreateStatement x ->
+            for (nm, ty) in x.Columns do
+                addProperty t nm (translateType ty)
+        | _ -> ()
 
     do
         logFile.AutoFlush <- true

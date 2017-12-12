@@ -226,6 +226,7 @@ let private pCreateStatement =
           }))
 
 let private pStatement =
+    spaces >>.
     choice [
         pSelectStatement
         pInsertStatement
