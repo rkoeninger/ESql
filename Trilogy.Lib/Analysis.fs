@@ -1,5 +1,12 @@
 ﻿module Trilogy.Analysis
 
+// TODO: instead of returning just a Set<Type>, infer could return a
+//       Deduction { Set<Type>, List<Deduction>, SourceCodeLocation, ... }
+//       which includes a paper trail of where deductions where made,
+//       where it was discovered they conflicted, etc.
+//       so more useful error messages can be produced with the exact places
+//       for a developer to look at to solve the problem
+
 let mapFst f (x, y) = (f x, y)
 
 let single xs =
